@@ -10,6 +10,7 @@ export namespace SystemRoleApi {
     permissions: string[];
     remark?: string;
     status: 0 | 1;
+    username: string;
   }
 }
 

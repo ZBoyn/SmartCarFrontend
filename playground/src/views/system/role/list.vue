@@ -5,7 +5,7 @@ import type {
   OnActionClickParams,
   VxeTableGridOptions,
 } from '#/adapter/vxe-table';
-import type { SystemRoleApi } from '#/api';
+import type { SystemUserApi } from '#/api';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
@@ -13,7 +13,7 @@ import { Plus } from '@vben/icons';
 import { Button, message, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteRole, getRoleList, updateRole } from '#/api';
+import { deleteUser, getUserList, updateUser } from '#/api';
 import { $t } from '#/locales';
 
 import { useColumns, useGridFormSchema } from './data';
@@ -37,7 +37,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
     proxyConfig: {
       ajax: {
         query: async ({ page }, formValues) => {
-          return await getRoleList({
+          return await getUserList({
             page: page.currentPage,
             pageSize: page.pageSize,
             ...formValues,
@@ -46,9 +46,8 @@ const [Grid, gridApi] = useVbenVxeGrid({
       },
     },
     rowConfig: {
-      keyField: 'id',
+      keyField: 'userId',
     },
-
     toolbarConfig: {
       custom: true,
       export: false,
@@ -56,10 +55,10 @@ const [Grid, gridApi] = useVbenVxeGrid({
       search: true,
       zoom: true,
     },
-  } as VxeTableGridOptions<SystemRoleApi.SystemRole>,
+  } as VxeTableGridOptions<SystemUserApi.SystemUser>,
 });
 
-function onActionClick(e: OnActionClickParams<SystemRoleApi.SystemRole>) {
+function onActionClick(e: OnActionClickParams<SystemUserApi.SystemUser>) {
   switch (e.code) {
     case 'delete': {
       onDelete(e.row);
@@ -99,39 +98,39 @@ function confirm(content: string, title: string) {
  * @returns 返回false则中止改变，返回其他值（undefined、true）则允许改变
  */
 async function onStatusChange(
-  newStatus: number,
-  row: SystemRoleApi.SystemRole,
+  newStatus: string,
+  row: SystemUserApi.SystemUser,
 ) {
   const status: Recordable<string> = {
-    0: '禁用',
-    1: '启用',
+    '0': '禁用',
+    '1': '启用',
   };
   try {
     await confirm(
-      `你要将${row.name}的状态切换为 【${status[newStatus.toString()]}】 吗？`,
+      `你要将${row.username}的状态切换为 【${status[newStatus.toString()]}】 吗？`,
       `切换状态`,
     );
-    await updateRole(row.id, { status: newStatus });
+    await updateUser(row.userId, { ...row, status: newStatus });
     return true;
   } catch {
     return false;
   }
 }
 
-function onEdit(row: SystemRoleApi.SystemRole) {
+function onEdit(row: SystemUserApi.SystemUser) {
   formDrawerApi.setData(row).open();
 }
 
-function onDelete(row: SystemRoleApi.SystemRole) {
+function onDelete(row: SystemUserApi.SystemUser) {
   const hideLoading = message.loading({
-    content: $t('ui.actionMessage.deleting', [row.name]),
+    content: $t('ui.actionMessage.deleting', [row.username]),
     duration: 0,
     key: 'action_process_msg',
   });
-  deleteRole(row.id)
+  deleteUser(row.userId)
     .then(() => {
       message.success({
-        content: $t('ui.actionMessage.deleteSuccess', [row.name]),
+        content: $t('ui.actionMessage.deleteSuccess', [row.username]),
         key: 'action_process_msg',
       });
       onRefresh();
@@ -152,11 +151,11 @@ function onCreate() {
 <template>
   <Page auto-content-height>
     <FormDrawer />
-    <Grid :table-title="$t('system.role.list')">
+    <Grid :table-title="$t('system.user.list')">
       <template #toolbar-tools>
         <Button type="primary" @click="onCreate">
           <Plus class="size-5" />
-          {{ $t('ui.actionTitle.create', [$t('system.role.name')]) }}
+          {{ $t('ui.actionTitle.create', [$t('system.user.username')]) }}
         </Button>
       </template>
     </Grid>
