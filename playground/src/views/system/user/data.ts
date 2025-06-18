@@ -4,6 +4,8 @@ import type { SystemUserApi } from '#/api';
 
 import { $t } from '#/locales';
 
+import { departments, getDepartmentName } from './department';
+
 export function useFormSchema(): VbenFormSchema[] {
   return [
     {
@@ -19,9 +21,17 @@ export function useFormSchema(): VbenFormSchema[] {
       rules: 'required',
     },
     {
-      component: 'Input',
+      component: 'Select', // 将 Input 修改为 Select
       fieldName: 'deptId',
-      label: $t('system.user.deptId'),
+      label: $t('system.user.department'),
+      componentProps: {
+        // allowClear: true, // 如果需要清空选项，可以开启
+        options: departments.map((dept) => ({
+          label: dept.name,
+          value: dept.id,
+        })),
+      },
+      rules: 'required', // 建议设为必填
     },
     {
       component: 'Input',
@@ -63,9 +73,16 @@ export function useGridFormSchema(): VbenFormSchema[] {
       label: $t('system.user.nickname'),
     },
     {
-      component: 'Input',
+      component: 'Select', // 将 Input 修改为 Select
       fieldName: 'deptId',
-      label: $t('system.user.deptId'),
+      label: $t('system.user.department'),
+      componentProps: {
+        allowClear: true, // 搜索时通常允许清空
+        options: departments.map((dept) => ({
+          label: dept.name,
+          value: dept.id,
+        })),
+      },
     },
     {
       component: 'Input',
@@ -98,6 +115,11 @@ export function useColumns<T = SystemUserApi.SystemUser>(
 ): VxeTableGridOptions['columns'] {
   return [
     {
+      type: 'checkbox',
+      width: 60,
+      fixed: 'left', // 将复选框列固定在左侧
+    },
+    {
       field: 'userId',
       title: $t('system.user.userId'),
       width: 100,
@@ -114,8 +136,11 @@ export function useColumns<T = SystemUserApi.SystemUser>(
     },
     {
       field: 'deptId',
-      title: $t('system.user.deptId'),
-      width: 100,
+      title: $t('system.user.department'), // 建议修改国际化文本为"部门"而非"部门ID"
+      width: 120, // 可适当调整宽度
+      formatter: ({ cellValue }: { cellValue: string }) =>
+        getDepartmentName(cellValue),
+      // cellRender 可以移除，formatter 更直接
     },
     {
       field: 'phoneNumber',
@@ -153,12 +178,26 @@ export function useColumns<T = SystemUserApi.SystemUser>(
           nameTitle: $t('system.user.username'),
           onClick: onActionClick,
         },
+        options: [
+          {
+            code: 'edit',
+            title: $t('ui.actionTitle.edit'),
+          },
+          {
+            code: 'reset-password',
+            title: '重置密码',
+          },
+          {
+            code: 'delete',
+            title: $t('ui.actionTitle.delete'),
+          },
+        ],
         name: 'CellOperation',
       },
       field: 'operation',
       fixed: 'right',
       title: $t('system.user.operation'),
-      width: 130,
+      width: 200,
     },
   ];
 }

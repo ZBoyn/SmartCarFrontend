@@ -3,7 +3,7 @@ import type { DataNode } from 'ant-design-vue/es/tree';
 
 import type { Recordable } from '@vben/types';
 
-import type { SystemRoleApi } from '#/api/system/role';
+import type { SystemUserApi } from '#/api/system/user';
 
 import { computed, ref } from 'vue';
 
@@ -13,15 +13,14 @@ import { IconifyIcon } from '@vben/icons';
 import { Spin } from 'ant-design-vue';
 
 import { useVbenForm } from '#/adapter/form';
-import { getMenuList } from '#/api/system/menu';
-import { createRole, updateRole } from '#/api/system/role';
+import { createUser, updateUser } from '#/api/';
 import { $t } from '#/locales';
 
 import { useFormSchema } from '../data';
 
 const emits = defineEmits(['success']);
 
-const formData = ref<SystemRoleApi.SystemRole>();
+const formData = ref<SystemUserApi.SystemUser>();
 
 const [Form, formApi] = useVbenForm({
   schema: useFormSchema(),
@@ -38,7 +37,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
     if (!valid) return;
     const values = await formApi.getValues();
     drawerApi.lock();
-    (id.value ? updateRole(id.value, values) : createRole(values))
+    (id.value ? updateUser(id.value, values) : createUser(values))
       .then(() => {
         emits('success');
         drawerApi.close();
@@ -49,32 +48,32 @@ const [Drawer, drawerApi] = useVbenDrawer({
   },
   onOpenChange(isOpen) {
     if (isOpen) {
-      const data = drawerApi.getData<SystemRoleApi.SystemRole>();
+      const data = drawerApi.getData<SystemUserApi.SystemUser>();
       formApi.resetForm();
       if (data) {
         formData.value = data;
-        id.value = data.id;
+        id.value = data.userId;
         formApi.setValues(data);
       } else {
         id.value = undefined;
       }
 
-      if (permissions.value.length === 0) {
-        loadPermissions();
-      }
+      // if (permissions.value.length === 0) {
+      //   loadPermissions();
+      // }
     }
   },
 });
 
-async function loadPermissions() {
-  loadingPermissions.value = true;
-  try {
-    const res = await getMenuList();
-    permissions.value = res as unknown as DataNode[];
-  } finally {
-    loadingPermissions.value = false;
-  }
-}
+// async function loadPermissions() {
+//   loadingPermissions.value = true;
+//   try {
+//     const res = await getMenuList();
+//     permissions.value = res as unknown as DataNode[];
+//   } finally {
+//     loadingPermissions.value = false;
+//   }
+// }
 
 const getDrawerTitle = computed(() => {
   return formData.value?.id

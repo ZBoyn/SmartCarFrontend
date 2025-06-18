@@ -157,6 +157,10 @@ setupVbenVxeTable({
           edit: {
             text: $t('common.edit'),
           },
+          'reset-password': {
+            type: 'primary',
+            text: '重置密码',
+          },
         };
         const operations: Array<Recordable<any>> = (
           options || ['edit', 'delete']

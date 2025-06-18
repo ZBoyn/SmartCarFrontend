@@ -63,4 +63,12 @@ async function deleteUser(id: number) {
   return requestClient.delete(`/system/user/${id}`);
 }
 
-export { createUser, deleteUser, getUserList, updateUser };
+/**
+ * 重置用户密码
+ * @param id 用户ID
+ */
+async function resetUserPassword(id: number) {
+  return requestClient.put(`/system/user/${id}/reset-password`);
+}
+
+export { createUser, deleteUser, getUserList, resetUserPassword, updateUser };

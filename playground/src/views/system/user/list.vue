@@ -7,17 +7,21 @@ import type {
 } from '#/adapter/vxe-table';
 import type { SystemUserApi } from '#/api';
 
+import { ref } from 'vue';
+
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
 import { Button, message, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteUser, getUserList, updateUser } from '#/api';
+import { deleteUser, getUserList, resetUserPassword, updateUser } from '#/api';
 import { $t } from '#/locales';
 
 import { useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
+
+const selectedRows = ref<SystemUserApi.SystemUser[]>([]);
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
@@ -55,6 +59,19 @@ const [Grid, gridApi] = useVbenVxeGrid({
       search: true,
       zoom: true,
     },
+    checkboxConfig: {
+      checkField: 'checked',
+      // checkMethod 也可以在这里定义
+      checkMethod: ({ row }) => row.username !== 'admin',
+    },
+    // 直接将 events 块替换为 onCheckboxChange 属性
+    onCheckboxChange: ({
+      records,
+    }: {
+      records: SystemUserApi.SystemUser[];
+    }) => {
+      selectedRows.value = records;
+    },
   } as VxeTableGridOptions<SystemUserApi.SystemUser>,
 });
 
@@ -66,6 +83,10 @@ function onActionClick(e: OnActionClickParams<SystemUserApi.SystemUser>) {
     }
     case 'edit': {
       onEdit(e.row);
+      break;
+    }
+    case 'reset-password': {
+      onResetPassword(e.row);
       break;
     }
   }
@@ -118,7 +139,14 @@ async function onStatusChange(
 }
 
 function onEdit(row: SystemUserApi.SystemUser) {
-  formDrawerApi.setData(row).open();
+  // 在 setData 之前，创建一个新对象并转换数据类型
+  const formData = {
+    ...row,
+    // 使用 toString() 确保 deptId 是字符串类型
+    // 使用可选链操作符 ?. 避免 row.deptId 为 null 或 undefined 时报错
+    deptId: row.deptId?.toString(),
+  };
+  formDrawerApi.setData(formData).open();
 }
 
 function onDelete(row: SystemUserApi.SystemUser) {
@@ -140,12 +168,58 @@ function onDelete(row: SystemUserApi.SystemUser) {
     });
 }
 
+async function onBatchDelete() {
+  if (selectedRows.value.length === 0) {
+    message.warning($t('demos.actionMessage.pleaseSelect'));
+    return;
+  }
+
+  try {
+    await confirm(
+      $t('demos.actionMessage.batchDeleteConfirm', [selectedRows.value.length]),
+      $t('demos.actionTitle.batchDelete'),
+    );
+
+    // 使用 Promise.all 并行删除所有选中的用户
+    await Promise.all(selectedRows.value.map((row) => deleteUser(row.userId)));
+
+    message.success({
+      content: $t('demos.actionMessage.batchDeleteSuccess'),
+      key: 'action_process_msg',
+    });
+
+    selectedRows.value = [];
+    onRefresh();
+  } catch (error) {
+    if (error instanceof Error && error.message !== '已取消') {
+      message.error($t('demos.actionMessage.batchDeleteFailed'));
+    }
+  }
+}
+
 function onRefresh() {
   gridApi.query();
 }
 
 function onCreate() {
   formDrawerApi.setData({}).open();
+}
+
+async function onResetPassword(row: SystemUserApi.SystemUser) {
+  try {
+    await confirm(`确定要重置用户 ${row.username} 的密码吗？`, '重置密码');
+
+    await resetUserPassword(row.userId);
+
+    message.success({
+      content: `用户 ${row.username} 的密码已重置`,
+      key: 'action_process_msg',
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message !== '已取消') {
+      message.error('重置密码失败');
+    }
+  }
 }
 </script>
 <template>
@@ -156,6 +230,14 @@ function onCreate() {
         <Button type="primary" @click="onCreate">
           <Plus class="size-5" />
           {{ $t('ui.actionTitle.create', [$t('system.user.username')]) }}
+        </Button>
+        <Button
+          type="primary"
+          danger
+          :disabled="selectedRows.length === 0"
+          @click="onBatchDelete"
+        >
+          {{ $t('demos.actionTitle.batchDelete') }}
         </Button>
       </template>
     </Grid>
