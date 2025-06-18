@@ -57,12 +57,9 @@ const [Drawer, drawerApi] = useVbenDrawer({
       } else {
         id.value = undefined;
       }
-
     }
   },
 });
-
-
 
 const getDrawerTitle = computed(() => {
   return formData.value?.id

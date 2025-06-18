@@ -200,8 +200,6 @@ function onRefresh() {
 function onCreate() {
   formDrawerApi.setData({}).open();
 }
-
-
 </script>
 <template>
   <Page auto-content-height>

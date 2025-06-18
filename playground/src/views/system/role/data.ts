@@ -22,7 +22,7 @@ export function useFormSchema(): VbenFormSchema[] {
       component: 'Select', // 将 Input 修改为 Select
       fieldName: 'dataScope',
       label: $t('system.role.dataScope'),
-      
+
       rules: 'required', // 建议设为必填
     },
     {
@@ -70,7 +70,6 @@ export function useGridFormSchema(): VbenFormSchema[] {
       label: $t('system.role.dataScope'),
       componentProps: {
         allowClear: true, // 搜索时通常允许清空
-        
       },
     },
     {
@@ -127,7 +126,6 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
       field: 'dataScope',
       title: $t('system.role.dataScope'), // 建议修改国际化文本为"部门"而非"部门ID"
       width: 120, // 可适当调整宽度
-      
     },
     {
       field: 'roleSort',
