@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { Modal, Select, message } from 'ant-design-vue';
-import { getAllRoles, changeUserRole } from '#/api';
 import type { SystemUserApi } from '#/api';
 
+import { ref, watch } from 'vue';
+
+import { message, Modal, Select } from 'ant-design-vue';
+
+import { changeUserRole, getAllRoles } from '#/api';
+
 const props = defineProps<{
-  user: SystemUserApi.SystemUser | null;
+  user: null | SystemUserApi.SystemUser;
   visible: boolean;
 }>();
 const emit = defineEmits(['update:visible', 'success']);
@@ -22,7 +25,7 @@ watch(
       selectedRole.value = props.user?.roleId;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function handleOk() {
@@ -59,7 +62,11 @@ function handleCancel() {
       style="width: 100%"
       placeholder="请选择角色"
     >
-      <Select.Option v-for="role in roles" :key="role.roleId" :value="role.roleId">
+      <Select.Option
+        v-for="role in roles"
+        :key="role.roleId"
+        :value="role.roleId"
+      >
         {{ role.roleName }}
       </Select.Option>
     </Select>

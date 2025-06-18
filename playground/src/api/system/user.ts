@@ -71,7 +71,6 @@ async function resetUserPassword(id: number) {
   return requestClient.put(`/system/user/${id}/reset-password`);
 }
 
-
 // 获取所有角色
 async function getAllRoles() {
   return requestClient.get('/system/role/list');
@@ -79,8 +78,17 @@ async function getAllRoles() {
 
 // 分配角色
 async function changeUserRole(userId: number, roleId: string) {
-  return requestClient.put(`/system/user/${userId}/change-role?roleId=${roleId}`);
+  return requestClient.put(
+    `/system/user/${userId}/change-role?roleId=${roleId}`,
+  );
 }
 
-
-export { createUser, deleteUser, getUserList, resetUserPassword, updateUser, getAllRoles, changeUserRole };
+export {
+  changeUserRole,
+  createUser,
+  deleteUser,
+  getAllRoles,
+  getUserList,
+  resetUserPassword,
+  updateUser,
+};
