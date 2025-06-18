@@ -55,13 +55,16 @@
     "list": "角色列表",
     "name": "角色",
     "roleName": "角色名称",
-    "id": "角色ID",
+    "roleId": "角色ID",
     "status": "状态",
     "remark": "备注",
     "createTime": "创建时间",
     "operation": "操作",
     "permissions": "权限",
-    "setPermissions": "授权"
+    "setPermissions": "授权",
+    "roleKey": "权限字符",
+    "dataScope": "数据范围",
+    "roleSort": "显示顺序"
   },
   "title": "系统管理",
   "user": {
