@@ -19,6 +19,7 @@ import { deleteUser, getUserList, resetUserPassword, updateUser } from '#/api';
 import { $t } from '#/locales';
 
 import { useColumns, useGridFormSchema } from './data';
+import AssignRole from './modules/assign-role.vue';
 import Form from './modules/form.vue';
 
 const selectedRows = ref<SystemUserApi.SystemUser[]>([]);
@@ -75,8 +76,15 @@ const [Grid, gridApi] = useVbenVxeGrid({
   } as VxeTableGridOptions<SystemUserApi.SystemUser>,
 });
 
+const assignRoleVisible = ref(false);
+const currentUser = ref<null | SystemUserApi.SystemUser>(null);
+
 function onActionClick(e: OnActionClickParams<SystemUserApi.SystemUser>) {
   switch (e.code) {
+    case 'assign-role': {
+      onAssignRole(e.row);
+      break;
+    }
     case 'delete': {
       onDelete(e.row);
       break;
@@ -221,6 +229,11 @@ async function onResetPassword(row: SystemUserApi.SystemUser) {
     }
   }
 }
+
+function onAssignRole(row: SystemUserApi.SystemUser) {
+  currentUser.value = row;
+  assignRoleVisible.value = true;
+}
 </script>
 <template>
   <Page auto-content-height>
@@ -241,5 +254,11 @@ async function onResetPassword(row: SystemUserApi.SystemUser) {
         </Button>
       </template>
     </Grid>
+    <AssignRole
+      :user="currentUser"
+      :visible="assignRoleVisible"
+      @update:visible="assignRoleVisible = $event"
+      @success="onRefresh"
+    />
   </Page>
 </template>

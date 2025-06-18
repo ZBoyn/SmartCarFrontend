@@ -79,6 +79,7 @@
     "createTime": "创建时间",
     "operation": "操作",
     "remark": "备注",
-    "department": "部门"
+    "department": "部门",
+    "assignRole": "分配角色"
   }
 }

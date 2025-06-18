@@ -158,8 +158,10 @@ setupVbenVxeTable({
             text: $t('common.edit'),
           },
           'reset-password': {
-            type: 'primary',
             text: '重置密码',
+          },
+          'assign-role': {
+            text: '分配角色',
           },
         };
         const operations: Array<Recordable<any>> = (

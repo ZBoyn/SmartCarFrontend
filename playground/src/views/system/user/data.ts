@@ -163,7 +163,7 @@ export function useColumns<T = SystemUserApi.SystemUser>(
     {
       field: 'createTime',
       title: $t('system.user.createTime'),
-      width: 180,
+      width: 220,
     },
     {
       field: 'remark',
@@ -184,12 +184,16 @@ export function useColumns<T = SystemUserApi.SystemUser>(
             title: $t('ui.actionTitle.edit'),
           },
           {
-            code: 'reset-password',
-            title: '重置密码',
-          },
-          {
             code: 'delete',
             title: $t('ui.actionTitle.delete'),
+          },
+          {
+            code: 'reset-password',
+            title: $t('system.user.resetPassword'),
+          },
+          {
+            code: 'assign-role',
+            title: $t('system.user.assignRole'),
           },
         ],
         name: 'CellOperation',
@@ -197,7 +201,7 @@ export function useColumns<T = SystemUserApi.SystemUser>(
       field: 'operation',
       fixed: 'right',
       title: $t('system.user.operation'),
-      width: 200,
+      width: 250,
     },
   ];
 }
