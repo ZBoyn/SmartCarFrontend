@@ -2,9 +2,12 @@ import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { InspectionTaskApi } from '#/api';
 
+import { useUserData } from '#/composables';
 import { $t } from '#/locales';
 
 export function useFormSchema(): VbenFormSchema[] {
+  const { userOptions } = useUserData();
+
   return [
     {
       component: 'Input',
@@ -19,21 +22,36 @@ export function useFormSchema(): VbenFormSchema[] {
       rules: 'required',
     },
     {
-      component: 'Select', // 将 Input 修改为 Select
+      component: 'Select',
       fieldName: 'creatorId',
       label: $t('inspection.task.creatorId'),
-
-      rules: 'required', // 建议设为必填
+      rules: 'required',
+      componentProps: {
+        options: userOptions.value,
+        allowClear: true,
+        showSearch: true,
+        filterOption: (input: string, option: any) =>
+          option?.label?.toLowerCase().includes(input.toLowerCase()),
+      },
     },
     {
-      component: 'Input',
+      component: 'Select',
       fieldName: 'executorId',
       label: $t('inspection.task.executorId'),
+      componentProps: {
+        options: userOptions.value,
+        allowClear: true,
+        showSearch: true,
+        filterOption: (input: string, option: any) =>
+          option?.label?.toLowerCase().includes(input.toLowerCase()),
+      },
     },
   ];
 }
 
 export function useGridFormSchema(): VbenFormSchema[] {
+  const { userOptions } = useUserData();
+
   return [
     {
       component: 'Input',
@@ -46,17 +64,28 @@ export function useGridFormSchema(): VbenFormSchema[] {
       label: $t('inspection.task.taskId'),
     },
     {
-      component: 'Select', // 将 Input 修改为 Select
+      component: 'Select',
       fieldName: 'creatorId',
       label: $t('inspection.task.creatorId'),
       componentProps: {
-        allowClear: true, // 搜索时通常允许清空
+        options: userOptions.value,
+        allowClear: true,
+        showSearch: true,
+        filterOption: (input: string, option: any) =>
+          option?.label?.toLowerCase().includes(input.toLowerCase()),
       },
     },
     {
-      component: 'Input',
+      component: 'Select',
       fieldName: 'executorId',
       label: $t('inspection.task.executorId'),
+      componentProps: {
+        options: userOptions.value,
+        allowClear: true,
+        showSearch: true,
+        filterOption: (input: string, option: any) =>
+          option?.label?.toLowerCase().includes(input.toLowerCase()),
+      },
     },
     {
       component: 'RangePicker',
@@ -69,11 +98,13 @@ export function useGridFormSchema(): VbenFormSchema[] {
 export function useColumns<T = InspectionTaskApi.Task>(
   onActionClick: OnActionClickFn<T>,
 ): VxeTableGridOptions['columns'] {
+  const { getUserNameById } = useUserData();
+
   return [
     {
       type: 'checkbox',
       width: 60,
-      fixed: 'left', // 将复选框列固定在左侧
+      fixed: 'left',
     },
     {
       field: 'taskId',
@@ -99,11 +130,13 @@ export function useColumns<T = InspectionTaskApi.Task>(
       field: 'creatorId',
       title: $t('inspection.task.creatorId'),
       width: 100,
+      formatter: ({ cellValue }) => getUserNameById(cellValue),
     },
     {
       field: 'executorId',
       title: $t('inspection.task.executorId'),
       width: 100,
+      formatter: ({ cellValue }) => getUserNameById(cellValue),
     },
     {
       field: 'deadlineTime',

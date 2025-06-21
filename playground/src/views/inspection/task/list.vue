@@ -5,7 +5,7 @@ import type {
 } from '#/adapter/vxe-table';
 import type { InspectionTaskApi } from '#/api';
 
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
@@ -14,12 +14,20 @@ import { Button, message, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteTask, getTaskList } from '#/api';
+import { useUserData } from '#/composables';
 import { $t } from '#/locales';
 
 import { useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
 
 const selectedRows = ref<InspectionTaskApi.Task[]>([]);
+
+// 初始化用户数据
+const { fetchUserList } = useUserData();
+
+onMounted(() => {
+  fetchUserList();
+});
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
