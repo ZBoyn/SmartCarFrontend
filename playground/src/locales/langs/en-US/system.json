@@ -61,5 +61,23 @@
     "operation": "Operation",
     "permissions": "Permissions",
     "setPermissions": "Permissions"
+  },
+
+  "user": {
+    "title": "User Management",
+    "list": "User List",
+    "userId": "User ID",
+    "username": "User Name",
+    "nickname": "Nick Name",
+    "deptId": "Department ID",
+    "phoneNumber": "Phone Number",
+    "status": "Status",
+    "createTime": "Create Time",
+    "operation": "Operation",
+    "remark": "Remark",
+    "department": "Department",
+    "assignRole": "Assign Role"
   }
+
+
 }
