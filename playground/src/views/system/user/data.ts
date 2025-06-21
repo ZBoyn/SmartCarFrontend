@@ -164,6 +164,7 @@ export function useColumns<T = SystemUserApi.SystemUser>(
       field: 'createTime',
       title: $t('system.user.createTime'),
       width: 220,
+      formatter: 'formatDateTime',
     },
     {
       field: 'remark',

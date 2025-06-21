@@ -5,6 +5,8 @@ import type {
 } from '#/adapter/vxe-table';
 import type { SystemDeptApi } from '#/api/system/dept';
 
+import { ref } from 'vue';
+
 import { Page, useVbenModal } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
@@ -14,13 +16,15 @@ import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteDept, getDeptList } from '#/api/system/dept';
 import { $t } from '#/locales';
 
-import { useColumns } from './data';
+import { useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
 
 const [FormModal, formModalApi] = useVbenModal({
   connectedComponent: Form,
   destroyOnClose: true,
 });
+
+const isAllExpanded = ref(true);
 
 /**
  * 编辑部门
@@ -35,7 +39,7 @@ function onEdit(row: SystemDeptApi.SystemDept) {
  * @param row
  */
 function onAppend(row: SystemDeptApi.SystemDept) {
-  formModalApi.setData({ pid: row.id }).open();
+  formModalApi.setData({ parentId: String(row.deptId) }).open();
 }
 
 /**
@@ -51,14 +55,14 @@ function onCreate() {
  */
 function onDelete(row: SystemDeptApi.SystemDept) {
   const hideLoading = message.loading({
-    content: $t('ui.actionMessage.deleting', [row.name]),
+    content: $t('ui.actionMessage.deleting', [row.deptName]),
     duration: 0,
     key: 'action_process_msg',
   });
-  deleteDept(row.id)
+  deleteDept(String(row.deptId))
     .then(() => {
       message.success({
-        content: $t('ui.actionMessage.deleteSuccess', [row.name]),
+        content: $t('ui.actionMessage.deleteSuccess', [row.deptName]),
         key: 'action_process_msg',
       });
       refreshGrid();
@@ -92,7 +96,10 @@ function onActionClick({
 }
 
 const [Grid, gridApi] = useVbenVxeGrid({
-  gridEvents: {},
+  formOptions: {
+    schema: useGridFormSchema(),
+    submitOnChange: true,
+  },
   gridOptions: {
     columns: useColumns(onActionClick),
     height: 'auto',
@@ -102,8 +109,17 @@ const [Grid, gridApi] = useVbenVxeGrid({
     },
     proxyConfig: {
       ajax: {
-        query: async (_params) => {
-          return await getDeptList();
+        query: async (_params, formValues) => {
+          // 只传递有值的查询参数
+          const params: any = {};
+          if (formValues?.deptName) params.deptName = formValues.deptName;
+          if (
+            formValues?.status !== undefined &&
+            formValues.status !== null &&
+            formValues.status !== ''
+          )
+            params.status = formValues.status;
+          return await getDeptList(params);
         },
       },
     },
@@ -114,8 +130,8 @@ const [Grid, gridApi] = useVbenVxeGrid({
       zoom: true,
     },
     treeConfig: {
-      parentField: 'pid',
-      rowField: 'id',
+      parentField: 'parentId',
+      rowField: 'deptId',
       transform: false,
     },
   } as VxeTableGridOptions,
@@ -127,6 +143,11 @@ const [Grid, gridApi] = useVbenVxeGrid({
 function refreshGrid() {
   gridApi.query();
 }
+
+function toggleExpandAll() {
+  isAllExpanded.value = !isAllExpanded.value;
+  gridApi.grid.setAllTreeExpand(isAllExpanded.value);
+}
 </script>
 <template>
   <Page auto-content-height>
@@ -135,7 +156,14 @@ function refreshGrid() {
       <template #toolbar-tools>
         <Button type="primary" @click="onCreate">
           <Plus class="size-5" />
-          {{ $t('ui.actionTitle.create', [$t('system.dept.name')]) }}
+          {{ $t('ui.actionTitle.create', [$t('system.dept.deptName')]) }}
+        </Button>
+        <Button style="margin-left: 8px" @click="toggleExpandAll">
+          {{
+            isAllExpanded
+              ? $t('system.dept.collapseAll')
+              : $t('system.dept.expandAll')
+          }}
         </Button>
       </template>
     </Grid>

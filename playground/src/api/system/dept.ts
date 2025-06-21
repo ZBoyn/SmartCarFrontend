@@ -4,20 +4,47 @@ export namespace SystemDeptApi {
   export interface SystemDept {
     [key: string]: any;
     children?: SystemDept[];
-    id: string;
-    name: string;
+    deptId: number;
+    deptName: string;
+    parentId?: number | string;
     remark?: string;
     status: 0 | 1;
   }
 }
 
 /**
+ * 扁平数组转树结构
+ */
+function listToTree(
+  list: SystemDeptApi.SystemDept[],
+): SystemDeptApi.SystemDept[] {
+  const map = new Map<number, SystemDeptApi.SystemDept>();
+  const tree: SystemDeptApi.SystemDept[] = [];
+  list.forEach((item) => {
+    map.set(item.deptId, { ...item, children: [] });
+  });
+  map.forEach((item) => {
+    if (item.parentId && item.parentId !== 0) {
+      const parent = map.get(Number(item.parentId));
+      if (parent && parent.children) {
+        parent.children.push(item);
+      }
+    } else {
+      tree.push(item);
+    }
+  });
+  return tree;
+}
+
+/**
  * 获取部门列表数据
  */
-async function getDeptList() {
-  return requestClient.get<Array<SystemDeptApi.SystemDept>>(
+async function getDeptList(params?: { deptName?: string; status?: number }) {
+  const res = await requestClient.get<Array<SystemDeptApi.SystemDept>>(
     '/system/dept/list',
+    { params },
   );
+  return listToTree(res);
 }
 
 /**

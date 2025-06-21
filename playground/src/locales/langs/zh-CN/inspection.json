@@ -1,0 +1,52 @@
+{
+  "title": "巡视管理",
+  "task": {
+    "title": "任务管理",
+    "list": "列表视图",
+    "calendar": "日历视图",
+    "add": "新增任务",
+    "edit": "编辑任务",
+    "view": "查看任务",
+    "delete": "删除任务",
+    "name": "任务",
+    "taskId": "任务ID",
+    "creatorId": "创建者",
+    "executorId": "执行者",
+    "startLocation": "开始位置",
+    "distance": "距离",
+    "deadlineTime": "最后执行时间",
+    "completionTime": "巡视完成时间",
+    "createTime": "数据上传时间",
+    "operation": "操作",
+    "priority": {
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    }
+  },
+  "defect": {
+    "title": "缺陷管理",
+    "add": "新增缺陷",
+    "edit": "编辑缺陷",
+    "view": "查看缺陷",
+    "delete": "删除缺陷",
+    "status": {
+      "open": "待处理",
+      "in_progress": "处理中",
+      "resolved": "已解决",
+      "closed": "已关闭"
+    },
+    "severity": {
+      "critical": "严重",
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "actions": {
+      "start_process": "开始处理",
+      "mark_resolved": "标记解决",
+      "close_defect": "关闭缺陷",
+      "more": "更多"
+    }
+  }
+} 

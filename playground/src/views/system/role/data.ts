@@ -140,6 +140,10 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
           inactiveValue: '0',
         },
         name: onStatusChange ? 'CellSwitch' : 'CellTag',
+        props: {
+          checkedValue: '1',
+          unCheckedValue: '0',
+        },
       },
       field: 'status',
       title: $t('system.role.status'),
@@ -149,6 +153,7 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
       field: 'createTime',
       title: $t('system.role.createTime'),
       width: 180,
+      formatter: 'formatDateTime',
     },
     {
       field: 'remark',

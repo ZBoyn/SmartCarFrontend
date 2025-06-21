@@ -16,9 +16,9 @@ import { useSchema } from '../data';
 const emit = defineEmits(['success']);
 const formData = ref<SystemDeptApi.SystemDept>();
 const getTitle = computed(() => {
-  return formData.value?.id
-    ? $t('ui.actionTitle.edit', [$t('system.dept.name')])
-    : $t('ui.actionTitle.create', [$t('system.dept.name')]);
+  return formData.value?.deptId
+    ? $t('ui.actionTitle.edit', [$t('system.dept.deptName')])
+    : $t('ui.actionTitle.create', [$t('system.dept.deptName')]);
 });
 
 const [Form, formApi] = useVbenForm({
@@ -39,8 +39,8 @@ const [Modal, modalApi] = useVbenModal({
       modalApi.lock();
       const data = await formApi.getValues();
       try {
-        await (formData.value?.id
-          ? updateDept(formData.value.id, data)
+        await (formData.value?.deptId
+          ? updateDept(String(formData.value.deptId), data)
           : createDept(data));
         modalApi.close();
         emit('success');
@@ -53,11 +53,18 @@ const [Modal, modalApi] = useVbenModal({
     if (isOpen) {
       const data = modalApi.getData<SystemDeptApi.SystemDept>();
       if (data) {
-        if (data.pid === 0) {
-          data.pid = undefined;
+        if (data.parentId === '0' || data.parentId === 0) {
+          data.parentId = undefined;
+        } else if (typeof data.parentId === 'number') {
+          data.parentId = String(data.parentId);
         }
         formData.value = data;
-        formApi.setValues(formData.value);
+        const formValue = {
+          ...formData.value,
+          parentId:
+            data.parentId === undefined ? undefined : String(data.parentId),
+        };
+        formApi.setValues(formValue);
       }
     }
   },

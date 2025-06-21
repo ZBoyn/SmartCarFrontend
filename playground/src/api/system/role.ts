@@ -35,15 +35,14 @@ async function createRole(data: Omit<SystemRoleApi.SystemRole, 'id'>) {
 
 /**
  * 更新角色
- *
- * @param id 角色 ID
+ * @param roleId 角色 ID
  * @param data 角色数据
  */
 async function updateRole(
-  id: string,
-  data: Omit<SystemRoleApi.SystemRole, 'id'>,
+  roleId: string,
+  data: Omit<SystemRoleApi.SystemRole, 'roleId'>,
 ) {
-  return requestClient.put(`/system/role/${id}`, data);
+  return requestClient.put(`/system/role/${roleId}`, data);
 }
 
 /**

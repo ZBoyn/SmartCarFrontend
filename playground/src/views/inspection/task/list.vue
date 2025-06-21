@@ -1,11 +1,9 @@
 <script lang="ts" setup>
-import type { Recordable } from '@vben/types';
-
 import type {
   OnActionClickParams,
   VxeTableGridOptions,
 } from '#/adapter/vxe-table';
-import type { SystemRoleApi } from '#/api';
+import type { InspectionTaskApi } from '#/api';
 
 import { ref } from 'vue';
 
@@ -15,13 +13,13 @@ import { Plus } from '@vben/icons';
 import { Button, message, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteRole, getRoleList, updateRole } from '#/api';
+import { deleteTask, getTaskList } from '#/api';
 import { $t } from '#/locales';
 
 import { useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
 
-const selectedRows = ref<SystemRoleApi.SystemRole[]>([]);
+const selectedRows = ref<InspectionTaskApi.Task[]>([]);
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
@@ -35,13 +33,13 @@ const [Grid, gridApi] = useVbenVxeGrid({
     submitOnChange: true,
   },
   gridOptions: {
-    columns: useColumns(onActionClick, onStatusChange),
+    columns: useColumns(onActionClick),
     height: 'auto',
     keepSource: true,
     proxyConfig: {
       ajax: {
         query: async ({ page }, formValues) => {
-          return await getRoleList({
+          return await getTaskList({
             page: page.currentPage,
             pageSize: page.pageSize,
             ...formValues,
@@ -65,17 +63,13 @@ const [Grid, gridApi] = useVbenVxeGrid({
       checkMethod: ({ row }) => row.roleName !== 'admin',
     },
     // 直接将 events 块替换为 onCheckboxChange 属性
-    onCheckboxChange: ({
-      records,
-    }: {
-      records: SystemRoleApi.SystemRole[];
-    }) => {
+    onCheckboxChange: ({ records }: { records: InspectionTaskApi.Task[] }) => {
       selectedRows.value = records;
     },
-  } as VxeTableGridOptions<SystemRoleApi.SystemRole>,
+  } as VxeTableGridOptions<InspectionTaskApi.Task>,
 });
 
-function onActionClick(e: OnActionClickParams<SystemRoleApi.SystemRole>) {
+function onActionClick(e: OnActionClickParams<InspectionTaskApi.Task>) {
   switch (e.code) {
     case 'delete': {
       onDelete(e.row);
@@ -108,33 +102,7 @@ function confirm(content: string, title: string) {
   });
 }
 
-/**
- * 状态开关即将改变
- * @param newStatus 期望改变的状态值
- * @param row 行数据
- * @returns 返回false则中止改变，返回其他值（undefined、true）则允许改变
- */
-async function onStatusChange(
-  newStatus: string,
-  row: SystemRoleApi.SystemRole,
-) {
-  const status: Recordable<string> = {
-    '0': '禁用',
-    '1': '启用',
-  };
-  try {
-    await confirm(
-      `你要将${row.roleName}的状态切换为 【${status[newStatus.toString()]}】 吗？`,
-      `切换状态`,
-    );
-    await updateRole(row.roleId, { ...row, status: newStatus });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function onEdit(row: SystemRoleApi.SystemRole) {
+function onEdit(row: InspectionTaskApi.Task) {
   // 在 setData 之前，创建一个新对象并转换数据类型
   const formData = {
     ...row,
@@ -145,16 +113,16 @@ function onEdit(row: SystemRoleApi.SystemRole) {
   formDrawerApi.setData(formData).open();
 }
 
-function onDelete(row: SystemRoleApi.SystemRole) {
+function onDelete(row: InspectionTaskApi.Task) {
   const hideLoading = message.loading({
-    content: $t('ui.actionMessage.deleting', [row.roleName]),
+    content: $t('ui.actionMessage.deleting', [row.taskName]),
     duration: 0,
     key: 'action_process_msg',
   });
-  deleteRole(row.roleId)
+  deleteTask(row.taskId)
     .then(() => {
       message.success({
-        content: $t('ui.actionMessage.deleteSuccess', [row.roleName]),
+        content: $t('ui.actionMessage.deleteSuccess', [row.taskName]),
         key: 'action_process_msg',
       });
       onRefresh();
@@ -177,7 +145,7 @@ async function onBatchDelete() {
     );
 
     // 使用 Promise.all 并行删除所有选中的用户
-    await Promise.all(selectedRows.value.map((row) => deleteRole(row.userId)));
+    await Promise.all(selectedRows.value.map((row) => deleteTask(row.taskId)));
 
     message.success({
       content: $t('demos.actionMessage.batchDeleteSuccess'),
@@ -204,11 +172,11 @@ function onCreate() {
 <template>
   <Page auto-content-height>
     <FormDrawer />
-    <Grid :table-title="$t('system.role.list')">
+    <Grid :table-title="$t('inspection.task.list')">
       <template #toolbar-tools>
         <Button type="primary" @click="onCreate">
           <Plus class="size-5" />
-          {{ $t('ui.actionTitle.create', [$t('system.role.roleName')]) }}
+          {{ $t('ui.actionTitle.create', [$t('inspection.task.name')]) }}
         </Button>
         <Button
           type="primary"

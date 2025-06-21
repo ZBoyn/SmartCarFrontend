@@ -1,0 +1,48 @@
+{
+  "title": "Inspection Management",
+  "task": {
+    "title": "Task Management",
+    "list": "List View",
+    "calendar": "Calendar View",
+    "add": "Add Task",
+    "edit": "Edit Task",
+    "view": "View Task",
+    "delete": "Delete Task",
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    }
+  },
+  "defect": {
+    "title": "Defect Management",
+    "add": "Add Defect",
+    "edit": "Edit Defect",
+    "view": "View Defect",
+    "delete": "Delete Defect",
+    "status": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "severity": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "actions": {
+      "start_process": "Start Process",
+      "mark_resolved": "Mark Resolved",
+      "close_defect": "Close Defect",
+      "more": "More"
+    }
+  }
+} 

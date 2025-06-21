@@ -15,7 +15,7 @@ export function useSchema(): VbenFormSchema[] {
   return [
     {
       component: 'Input',
-      fieldName: 'name',
+      fieldName: 'deptName',
       label: $t('system.dept.deptName'),
       rules: z
         .string()
@@ -31,11 +31,11 @@ export function useSchema(): VbenFormSchema[] {
         allowClear: true,
         api: getDeptList,
         class: 'w-full',
-        labelField: 'name',
-        valueField: 'id',
+        labelField: 'deptName',
+        valueField: 'deptId',
         childrenField: 'children',
       },
-      fieldName: 'pid',
+      fieldName: 'parentId',
       label: $t('system.dept.parentDept'),
     },
     {
@@ -80,7 +80,7 @@ export function useColumns(
   return [
     {
       align: 'left',
-      field: 'name',
+      field: 'deptName',
       fixed: 'left',
       title: $t('system.dept.deptName'),
       treeNode: true,
@@ -96,6 +96,7 @@ export function useColumns(
       field: 'createTime',
       title: $t('system.dept.createTime'),
       width: 180,
+      formatter: 'formatDateTime',
     },
     {
       field: 'remark',
@@ -105,8 +106,8 @@ export function useColumns(
       align: 'right',
       cellRender: {
         attrs: {
-          nameField: 'name',
-          nameTitle: $t('system.dept.name'),
+          nameField: 'deptName',
+          nameTitle: $t('system.dept.deptName'),
           onClick: onActionClick,
         },
         name: 'CellOperation',
@@ -130,6 +131,31 @@ export function useColumns(
       showOverflow: false,
       title: $t('system.dept.operation'),
       width: 200,
+    },
+  ];
+}
+
+/**
+ * 查询表单 schema
+ */
+export function useGridFormSchema(): VbenFormSchema[] {
+  return [
+    {
+      component: 'Input',
+      fieldName: 'deptName',
+      label: $t('system.dept.deptName'),
+    },
+    {
+      component: 'Select',
+      fieldName: 'status',
+      label: $t('system.dept.status'),
+      componentProps: {
+        allowClear: true,
+        options: [
+          { label: $t('common.enabled'), value: 1 },
+          { label: $t('common.disabled'), value: 0 },
+        ],
+      },
     },
   ];
 }
