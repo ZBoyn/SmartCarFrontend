@@ -10,15 +10,18 @@ import { onMounted, ref } from 'vue';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'ant-design-vue';
+import { Button, message, Modal, Radio } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteTask, getTaskList } from '#/api';
+import { deleteTask, getTaskList, updateTask } from '#/api';
 import { useUserData } from '#/composables';
 import { $t } from '#/locales';
 
+import CalendarView from './calendar.vue';
 import { useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
+
+const viewMode = ref('calendar');
 
 const selectedRows = ref<InspectionTaskApi.Task[]>([]);
 
@@ -79,6 +82,10 @@ const [Grid, gridApi] = useVbenVxeGrid({
 
 function onActionClick(e: OnActionClickParams<InspectionTaskApi.Task>) {
   switch (e.code) {
+    case 'change-status': {
+      onChangeStatus(e.row);
+      break;
+    }
     case 'delete': {
       onDelete(e.row);
       break;
@@ -176,25 +183,79 @@ function onRefresh() {
 function onCreate() {
   formDrawerApi.setData({}).open();
 }
+
+/**
+ * 修改任务状态
+ * @param row 任务行数据
+ */
+async function onChangeStatus(row: InspectionTaskApi.Task) {
+  const statusOptions = [
+    { label: '待执行', value: 0 },
+    { label: '执行中', value: 1 },
+    { label: '已完成', value: 2 },
+    { label: '已取消', value: 3 },
+  ];
+
+  const currentStatus = statusOptions.find((opt) => opt.value === row.status);
+
+  // 简单的状态循环：待执行 -> 执行中 -> 已完成 -> 待执行
+  let newStatus: number;
+  if (row.status === 0) {
+    newStatus = 1;
+  } else if (row.status === 1) {
+    newStatus = 2;
+  } else {
+    newStatus = 0;
+  }
+  const newStatusLabel = statusOptions.find(
+    (opt) => opt.value === newStatus,
+  )?.label;
+
+  try {
+    await confirm(
+      `你要将${row.taskName}的状态从【${currentStatus?.label}】修改为【${newStatusLabel}】吗？`,
+      `修改状态`,
+    );
+
+    await updateTask(row.taskId, { ...row, status: newStatus });
+    message.success(`状态已修改为【${newStatusLabel}】`);
+    onRefresh();
+  } catch (error) {
+    if (error instanceof Error && error.message !== '已取消') {
+      message.error('状态修改失败');
+    }
+  }
+}
 </script>
 <template>
   <Page auto-content-height>
-    <FormDrawer />
-    <Grid :table-title="$t('inspection.task.list')">
-      <template #toolbar-tools>
-        <Button type="primary" @click="onCreate">
-          <Plus class="size-5" />
-          {{ $t('ui.actionTitle.create', [$t('inspection.task.name')]) }}
-        </Button>
-        <Button
-          type="primary"
-          danger
-          :disabled="selectedRows.length === 0"
-          @click="onBatchDelete"
-        >
-          {{ $t('demos.actionTitle.batchDelete') }}
-        </Button>
-      </template>
-    </Grid>
+    <div class="mb-3 flex justify-center">
+      <Radio.Group v-model:value="viewMode" button-style="solid">
+        <Radio.Button value="calendar">日历视图</Radio.Button>
+        <Radio.Button value="list">列表视图</Radio.Button>
+      </Radio.Group>
+    </div>
+    <template v-if="viewMode === 'list'">
+      <FormDrawer />
+      <Grid :table-title="$t('inspection.task.list')">
+        <template #toolbar-tools>
+          <Button type="primary" @click="onCreate">
+            <Plus class="size-5" />
+            {{ $t('ui.actionTitle.create', [$t('inspection.task.name')]) }}
+          </Button>
+          <Button
+            type="primary"
+            danger
+            :disabled="selectedRows.length === 0"
+            @click="onBatchDelete"
+          >
+            {{ $t('demos.actionTitle.batchDelete') }}
+          </Button>
+        </template>
+      </Grid>
+    </template>
+    <template v-else>
+      <CalendarView />
+    </template>
   </Page>
 </template>

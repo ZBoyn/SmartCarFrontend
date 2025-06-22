@@ -1,3 +1,5 @@
+import type { DatePickerProps } from 'ant-design-vue';
+
 import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { InspectionTaskApi } from '#/api';
@@ -5,8 +7,22 @@ import type { InspectionTaskApi } from '#/api';
 import { useUserData } from '#/composables';
 import { $t } from '#/locales';
 
+const taskStatusMap = {
+  0: { text: '待执行', color: 'orange' },
+  1: { text: '执行中', color: 'blue' },
+  2: { text: '已完成', color: 'green' },
+  3: { text: '已取消', color: 'red' },
+};
+
+const taskStatusOptions = Object.entries(taskStatusMap).map(([key, value]) => ({
+  label: value.text,
+  value: key,
+}));
+
 export function useFormSchema(): VbenFormSchema[] {
-  const { userOptions } = useUserData();
+  const { userOptions, initUserData } = useUserData();
+
+  initUserData();
 
   return [
     {
@@ -27,7 +43,7 @@ export function useFormSchema(): VbenFormSchema[] {
       label: $t('inspection.task.creatorId'),
       rules: 'required',
       componentProps: {
-        options: userOptions.value,
+        options: userOptions,
         allowClear: true,
         showSearch: true,
         filterOption: (input: string, option: any) =>
@@ -38,20 +54,60 @@ export function useFormSchema(): VbenFormSchema[] {
       component: 'Select',
       fieldName: 'executorId',
       label: $t('inspection.task.executorId'),
+      rules: 'required',
       componentProps: {
-        options: userOptions.value,
+        options: userOptions,
         allowClear: true,
         showSearch: true,
         filterOption: (input: string, option: any) =>
           option?.label?.toLowerCase().includes(input.toLowerCase()),
+      },
+    },
+    {
+      component: 'Input',
+      fieldName: 'startLocation',
+      label: $t('inspection.task.startLocation'),
+      rules: 'required',
+    },
+    {
+      component: 'Input',
+      fieldName: 'distance',
+      label: $t('inspection.task.distance'),
+      rules: 'required',
+    },
+    {
+      component: 'DatePicker',
+      fieldName: 'deadlineTime',
+      label: $t('inspection.task.deadlineTime'),
+      rules: 'required',
+      componentProps: {
+        showTime: true,
+        format: 'YYYY-MM-DD HH:mm:ss',
+      } as DatePickerProps,
+    },
+    {
+      component: 'DatePicker',
+      fieldName: 'completionTime',
+      label: $t('inspection.task.completionTime'),
+      componentProps: {
+        showTime: true,
+        format: 'YYYY-MM-DD HH:mm:ss',
+      } as DatePickerProps,
+    },
+    {
+      component: 'Select',
+      fieldName: 'status',
+      label: $t('inspection.task.status'),
+      componentProps: {
+        options: taskStatusOptions,
       },
     },
   ];
 }
 
 export function useGridFormSchema(): VbenFormSchema[] {
-  const { userOptions } = useUserData();
-
+  const { userOptions, initUserData } = useUserData();
+  initUserData();
   return [
     {
       component: 'Input',
@@ -68,7 +124,7 @@ export function useGridFormSchema(): VbenFormSchema[] {
       fieldName: 'creatorId',
       label: $t('inspection.task.creatorId'),
       componentProps: {
-        options: userOptions.value,
+        options: userOptions,
         allowClear: true,
         showSearch: true,
         filterOption: (input: string, option: any) =>
@@ -80,7 +136,7 @@ export function useGridFormSchema(): VbenFormSchema[] {
       fieldName: 'executorId',
       label: $t('inspection.task.executorId'),
       componentProps: {
-        options: userOptions.value,
+        options: userOptions,
         allowClear: true,
         showSearch: true,
         filterOption: (input: string, option: any) =>
@@ -88,9 +144,12 @@ export function useGridFormSchema(): VbenFormSchema[] {
       },
     },
     {
-      component: 'RangePicker',
-      fieldName: 'createTime',
-      label: $t('inspection.task.createTime'),
+      component: 'Select',
+      fieldName: 'status',
+      label: $t('inspection.task.status'),
+      componentProps: {
+        options: taskStatusOptions,
+      },
     },
   ];
 }
@@ -98,7 +157,8 @@ export function useGridFormSchema(): VbenFormSchema[] {
 export function useColumns<T = InspectionTaskApi.Task>(
   onActionClick: OnActionClickFn<T>,
 ): VxeTableGridOptions['columns'] {
-  const { getUserNameById } = useUserData();
+  const { getUserNameById, initUserData } = useUserData();
+  initUserData();
 
   return [
     {
@@ -119,35 +179,35 @@ export function useColumns<T = InspectionTaskApi.Task>(
     {
       field: 'startLocation',
       title: $t('inspection.task.startLocation'),
-      width: 80,
+      width: 120,
     },
     {
       field: 'distance',
       title: $t('inspection.task.distance'),
-      width: 80,
+      width: 120,
     },
     {
       field: 'creatorId',
       title: $t('inspection.task.creatorId'),
-      width: 100,
+      width: 120,
       formatter: ({ cellValue }) => getUserNameById(cellValue),
     },
     {
       field: 'executorId',
       title: $t('inspection.task.executorId'),
-      width: 100,
+      width: 120,
       formatter: ({ cellValue }) => getUserNameById(cellValue),
     },
     {
       field: 'deadlineTime',
       title: $t('inspection.task.deadlineTime'),
-      width: 150,
+      width: 180,
       formatter: 'formatDateTime',
     },
     {
       field: 'completionTime',
       title: $t('inspection.task.completionTime'),
-      width: 150,
+      width: 180,
       formatter: 'formatDateTime',
     },
     {
@@ -155,6 +215,21 @@ export function useColumns<T = InspectionTaskApi.Task>(
       title: $t('inspection.task.createTime'),
       width: 180,
       formatter: 'formatDateTime',
+    },
+    {
+      cellRender: {
+        name: 'CellTag',
+        options: [
+          { color: 'orange', label: '待执行', value: 0 },
+          { color: 'blue', label: '执行中', value: 1 },
+          { color: 'green', label: '已完成', value: 2 },
+          { color: 'red', label: '已取消', value: 3 },
+        ],
+      },
+      field: 'status',
+      title: $t('inspection.task.status'),
+      width: 120,
+      formatter: 'formatStatus',
     },
     {
       align: 'center',
@@ -170,6 +245,10 @@ export function useColumns<T = InspectionTaskApi.Task>(
             title: $t('ui.actionTitle.edit'),
           },
           {
+            code: 'change-status',
+            title: '修改状态',
+          },
+          {
             code: 'delete',
             title: $t('ui.actionTitle.delete'),
           },
@@ -179,7 +258,7 @@ export function useColumns<T = InspectionTaskApi.Task>(
       field: 'operation',
       fixed: 'right',
       title: $t('inspection.task.operation'),
-      width: 200,
+      width: 280,
     },
   ];
 }

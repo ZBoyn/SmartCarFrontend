@@ -9,6 +9,22 @@ const userList = ref<SystemUserApi.SystemUser[]>([]);
 const loading = ref(false);
 const isFetched = ref(false); // 添加一个标志位，防止重复请求
 
+async function initUserData() {
+  if (isFetched.value) return;
+
+  loading.value = true;
+  try {
+    const response = await getUserList({ page: 1, pageSize: 1000 });
+    userList.value = response?.items || [];
+    isFetched.value = true; // 标记为已获取
+  } catch (error) {
+    console.error('获取用户列表失败:', error);
+    isFetched.value = false; // 失败时允许重试
+  } finally {
+    loading.value = false;
+  }
+}
+
 /**
  * 用户数据管理 (Singleton)
  */
@@ -66,6 +82,7 @@ export function useUserData() {
   return {
     userList,
     loading,
+    initUserData,
     fetchUserList,
     getUserNameById,
     getUserNicknameById,

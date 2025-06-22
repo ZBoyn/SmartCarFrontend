@@ -12,6 +12,7 @@ export namespace InspectionTaskApi {
     distance: number;
     executorId: string;
     startLocation: string;
+    startTime: Date;
     status: number;
     taskId: string;
     taskName: string;

@@ -78,4 +78,17 @@ export function extendsDefaultFormatter(vxeUI: VxeUIExport) {
       return formatDateTime(cellValue);
     },
   });
+
+  vxeUI.formats.add('formatStatus', {
+    tableCellFormatMethod({ cellValue }) {
+      const statusMap = {
+        0: { text: '待执行', color: 'orange' },
+        1: { text: '执行中', color: 'blue' },
+        2: { text: '已完成', color: 'green' },
+        3: { text: '已取消', color: 'red' },
+      };
+      const status = statusMap[cellValue as keyof typeof statusMap];
+      return status ? status.text : cellValue;
+    },
+  });
 }

@@ -11,6 +11,7 @@ import { useVbenDrawer, VbenTree } from '@vben/common-ui';
 import { IconifyIcon } from '@vben/icons';
 
 import { Spin } from 'ant-design-vue';
+import dayjs from 'dayjs';
 
 import { useVbenForm } from '#/adapter/form';
 import { createTask, updateTask } from '#/api';
@@ -53,7 +54,16 @@ const [Drawer, drawerApi] = useVbenDrawer({
       if (data) {
         formData.value = data;
         taskId.value = data.taskId;
-        formApi.setValues(data);
+
+        // Convert date strings to dayjs objects
+        const values = { ...data } as Recordable<any>;
+        if (values.deadlineTime) {
+          values.deadlineTime = dayjs(values.deadlineTime);
+        }
+        if (values.completionTime) {
+          values.completionTime = dayjs(values.completionTime);
+        }
+        formApi.setValues(values);
       } else {
         taskId.value = undefined;
       }
