@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
           icon: 'mdi:alert-circle',
           title: $t('inspection.defect.title'),
         },
-        component: () => import('#/views/inspection/defect/index.vue'),
+        component: () => import('#/views/inspection/defect/list.vue'),
       },
     ],
   },

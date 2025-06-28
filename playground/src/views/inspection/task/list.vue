@@ -8,7 +8,7 @@ import type { InspectionTaskApi } from '#/api';
 import { onMounted, ref } from 'vue';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
-import { Plus } from '@vben/icons';
+import { Plus, SvgDownloadIcon } from '@vben/icons';
 
 import { Button, message, Modal, Radio } from 'ant-design-vue';
 
@@ -26,7 +26,7 @@ const viewMode = ref('calendar');
 const selectedRows = ref<InspectionTaskApi.Task[]>([]);
 
 // 初始化用户数据
-const { fetchUserList } = useUserData();
+const { fetchUserList, getUserNameById } = useUserData();
 
 onMounted(() => {
   fetchUserList();
@@ -63,10 +63,20 @@ const [Grid, gridApi] = useVbenVxeGrid({
     },
     toolbarConfig: {
       custom: true,
-      export: false,
+      export: true,
       refresh: { code: 'query' },
       search: true,
       zoom: true,
+    },
+    exportConfig: {
+      filename: '任务列表',
+      sheetName: '任务数据',
+      type: 'xlsx',
+      original: false,
+      columnFilterMethod({ column }) {
+        // 过滤掉操作列和复选框列
+        return !['checkbox', 'operation'].includes(column.field);
+      },
     },
     checkboxConfig: {
       checkField: 'checked',
@@ -226,6 +236,99 @@ async function onChangeStatus(row: InspectionTaskApi.Task) {
     }
   }
 }
+
+/**
+ * 导出当前页面数据
+ */
+function onExport() {
+  try {
+    // 获取当前表格的数据
+    const tableData = gridApi.grid.getTableData();
+
+    if (
+      !tableData ||
+      !tableData.tableData ||
+      tableData.tableData.length === 0
+    ) {
+      message.warning('没有数据可导出');
+      return;
+    }
+
+    // 获取列配置
+    const columns = gridApi.grid.getColumns();
+    const exportColumns = columns.filter(
+      (col) => !['checkbox', 'operation'].includes(col.field),
+    );
+
+    // 准备CSV数据
+    const headers = exportColumns.map((col) => col.title).join(',');
+    const rows = tableData.tableData.map((row) => {
+      return exportColumns
+        .map((col) => {
+          let value = row[col.field];
+
+          // 处理特殊字段
+          switch (col.field) {
+            case 'creatorId':
+            case 'executorId': {
+              value = getUserNameById(value);
+
+              break;
+            }
+            case 'distance': {
+              value = `${value}km`;
+
+              break;
+            }
+            case 'status': {
+              const statusMap = {
+                0: '待执行',
+                1: '执行中',
+                2: '已完成',
+                3: '已取消',
+              };
+              value = statusMap[value as keyof typeof statusMap] || value;
+
+              break;
+            }
+            // No default
+          }
+
+          // 处理包含逗号的值
+          if (typeof value === 'string' && value.includes(',')) {
+            value = `"${value}"`;
+          }
+
+          return value || '';
+        })
+        .join(',');
+    });
+
+    const csvContent = [headers, ...rows].join('\n');
+
+    // 创建下载链接
+    const blob = new Blob([`\uFEFF${csvContent}`], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute(
+      'download',
+      `任务列表_${new Date().toISOString().slice(0, 10)}.csv`,
+    );
+    link.style.visibility = 'hidden';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    message.success('导出成功');
+  } catch (error) {
+    console.error('导出错误:', error);
+    message.error('导出失败，请检查控制台错误信息');
+  }
+}
 </script>
 <template>
   <Page auto-content-height>
@@ -250,6 +353,10 @@ async function onChangeStatus(row: InspectionTaskApi.Task) {
             @click="onBatchDelete"
           >
             {{ $t('demos.actionTitle.batchDelete') }}
+          </Button>
+          <Button type="primary" @click="onExport">
+            <SvgDownloadIcon class="size-5" />
+            {{ $t('ui.actionTitle.export') }}
           </Button>
         </template>
       </Grid>
