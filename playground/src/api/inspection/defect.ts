@@ -61,11 +61,9 @@ async function createDefect(
 
 /**
  * 更新缺陷
- * @param data 缺陷数据
  * @returns 更新结果
  */
 async function updateDefect(
-  id: string,
   data: Omit<InspectionDefectApi.Defect, 'defectId'>,
 ) {
   return requestClient.put<InspectionDefectApi.Defect>(
