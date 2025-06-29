@@ -49,6 +49,19 @@
     },
     "badgeVariants": "Badge Style"
   },
+  "param": {
+    "title": "Parameter Management",
+    "list": "Parameter List",
+    "name": "Parameter",
+    "paramId": "Parameter ID",
+    "paramName": "Parameter Name",
+    "paramKey": "Parameter Key",
+    "paramValue": "Parameter Value",
+    "isBuiltIn": "System Built-in",
+    "description": "Description",
+    "createTime": "Create Time",
+    "operation": "Operation"
+  },
   "role": {
     "title": "Role Management",
     "list": "Role List",
@@ -78,6 +91,4 @@
     "department": "Department",
     "assignRole": "Assign Role"
   }
-
-
 }

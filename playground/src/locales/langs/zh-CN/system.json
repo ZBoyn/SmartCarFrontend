@@ -52,6 +52,19 @@
     "typeLink": "外链",
     "typeMenu": "菜单"
   },
+  "param": {
+    "title": "参数管理",
+    "list": "参数列表",
+    "name": "参数",
+    "paramId": "参数ID",
+    "paramName": "参数名称",
+    "paramKey": "参数键名",
+    "paramValue": "参数值",
+    "isBuiltIn": "系统内置",
+    "description": "描述",
+    "createTime": "创建时间",
+    "operation": "操作"
+  },
   "role": {
     "title": "角色管理",
     "list": "角色列表",
