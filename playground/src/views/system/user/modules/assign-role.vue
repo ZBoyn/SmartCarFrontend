@@ -29,7 +29,7 @@ watch(
         // 先获取所有角色
         const rolesRes = await getAllRoles();
         roles.value = rolesRes.items || [];
-        
+
         // 再获取用户当前角色
         let userRolesRes: SystemUserApi.ShowRoleDto[] = [];
         try {
@@ -38,7 +38,7 @@ watch(
           console.warn('获取用户角色失败:', error);
         }
         currentUserRoles.value = userRolesRes || [];
-        
+
         // 如果用户有当前角色，默认选中第一个
         if (currentUserRoles.value.length > 0) {
           selectedRole.value = currentUserRoles.value[0]?.roleId || '';
@@ -84,31 +84,27 @@ function handleCancel() {
     cancel-text="取消"
     :confirm-loading="loading"
   >
-    <div v-if="loading" class="text-center py-4">
+    <div v-if="loading" class="py-4 text-center">
       <span>加载中...</span>
     </div>
     <div v-else>
       <!-- 显示用户当前角色 -->
       <div v-if="currentUserRoles.length > 0" class="mb-4">
-        <div class="text-sm text-gray-600 mb-2">当前角色：</div>
+        <div class="mb-2 text-sm text-gray-600">当前角色：</div>
         <div class="flex flex-wrap gap-2">
-          <Tag
-            v-for="role in currentUserRoles"
-            :key="role.roleId"
-            color="blue"
-          >
+          <Tag v-for="role in currentUserRoles" :key="role.roleId" color="blue">
             {{ role.roleName }}
           </Tag>
         </div>
       </div>
       <div v-else class="mb-4">
-        <div class="text-sm text-gray-600 mb-2">当前角色：</div>
+        <div class="mb-2 text-sm text-gray-600">当前角色：</div>
         <Tag color="default">未分配角色</Tag>
       </div>
-      
+
       <!-- 角色选择 -->
       <div class="mb-4">
-        <div class="text-sm text-gray-600 mb-2">选择新角色：</div>
+        <div class="mb-2 text-sm text-gray-600">选择新角色：</div>
         <Select
           v-model:value="selectedRole"
           style="width: 100%"
