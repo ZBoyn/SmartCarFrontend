@@ -14,7 +14,8 @@
     "create": "新增{0}",
     "delete": "删除{0}",
     "view": "查看{0}",
-    "export": "导出"
+    "export": "导出",
+    "batchDelete": "批量删除"
   },
   "actionMessage": {
     "deleteConfirm": "确定删除 {0} 吗？",

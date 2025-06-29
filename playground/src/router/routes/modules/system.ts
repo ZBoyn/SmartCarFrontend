@@ -40,6 +40,15 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/system/menu/list.vue'),
       },
       {
+        path: '/system/param',
+        name: 'SystemParam',
+        meta: {
+          icon: 'mdi:cog',
+          title: $t('system.param.title'),
+        },
+        component: () => import('#/views/system/param/list.vue'),
+      },
+      {
         path: '/system/dept',
         name: 'SystemDept',
         meta: {
