@@ -1,3 +1,4 @@
+import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { SystemMenuApi } from '#/api/system/menu';
 
@@ -18,6 +19,48 @@ export function getMenuTypeOptions() {
       value: 'embedded',
     },
     { color: 'warning', label: $t('system.menu.typeLink'), value: 'link' },
+  ];
+}
+
+export function getMenuStatusOptions() {
+  return [
+    { label: '启用', value: 1, color: 'success' },
+    { label: '禁用', value: 0, color: 'error' },
+  ];
+}
+
+// 搜索表单配置
+export function useGridFormSchema(): VbenFormSchema[] {
+  return [
+    {
+      component: 'Input',
+      fieldName: 'name',
+      label: '菜单名称',
+      componentProps: {
+        placeholder: '请输入菜单名称',
+        allowClear: true,
+      },
+    },
+    {
+      component: 'Select',
+      fieldName: 'type',
+      label: '菜单类型',
+      componentProps: {
+        options: getMenuTypeOptions(),
+        placeholder: '请选择菜单类型',
+        allowClear: true,
+      },
+    },
+    {
+      component: 'Select',
+      fieldName: 'status',
+      label: '状态',
+      componentProps: {
+        options: getMenuStatusOptions(),
+        placeholder: '请选择状态',
+        allowClear: true,
+      },
+    },
   ];
 }
 
@@ -75,7 +118,7 @@ export function useColumns(
       title: $t('system.menu.component'),
     },
     {
-      cellRender: { name: 'CellTag' },
+      cellRender: { name: 'CellTag', options: getMenuStatusOptions() },
       field: 'status',
       title: $t('system.menu.status'),
       width: 100,

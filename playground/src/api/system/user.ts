@@ -23,6 +23,14 @@ export namespace SystemUserApi {
     pageSize: number;
     total: number;
   }
+
+  // 角色信息接口
+  export interface ShowRoleDto {
+    description?: string;
+    roleCode?: string;
+    roleId: string;
+    roleName: string;
+  }
 }
 
 /**
@@ -83,12 +91,20 @@ async function changeUserRole(userId: number, roleId: string) {
   );
 }
 
+// 获取指定用户的当前角色列表
+async function getUserRoles(userId: number) {
+  return requestClient.get<SystemUserApi.ShowRoleDto[]>(
+    `/system/user/${userId}/roles`,
+  );
+}
+
 export {
   changeUserRole,
   createUser,
   deleteUser,
   getAllRoles,
   getUserList,
+  getUserRoles,
   resetUserPassword,
   updateUser,
 };

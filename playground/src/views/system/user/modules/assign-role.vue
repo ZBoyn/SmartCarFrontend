@@ -3,9 +3,10 @@ import type { SystemUserApi } from '#/api';
 
 import { ref, watch } from 'vue';
 
-import { message, Modal, Select } from 'ant-design-vue';
+import { message, Modal, Select, Tag } from 'ant-design-vue';
 
 import { changeUserRole, getAllRoles } from '#/api';
+import { getUserRoles } from '#/api/system/user';
 
 const props = defineProps<{
   user: null | SystemUserApi.SystemUser;
@@ -15,14 +16,39 @@ const emit = defineEmits(['update:visible', 'success']);
 
 const roles = ref<{ roleId: string; roleName: string }[]>([]);
 const selectedRole = ref<string>();
+const currentUserRoles = ref<SystemUserApi.ShowRoleDto[]>([]);
+const loading = ref(false);
 
 watch(
   () => props.visible,
   async (val) => {
-    if (val) {
-      const res = await getAllRoles();
-      roles.value = res.items || [];
-      selectedRole.value = props.user?.roleId;
+    if (val && props.user?.userId) {
+      const userId = props.user.userId;
+      loading.value = true;
+      try {
+        // 先获取所有角色
+        const rolesRes = await getAllRoles();
+        roles.value = rolesRes.items || [];
+        
+        // 再获取用户当前角色
+        let userRolesRes: SystemUserApi.ShowRoleDto[] = [];
+        try {
+          userRolesRes = await getUserRoles(userId);
+        } catch (error) {
+          console.warn('获取用户角色失败:', error);
+        }
+        currentUserRoles.value = userRolesRes || [];
+        
+        // 如果用户有当前角色，默认选中第一个
+        if (currentUserRoles.value.length > 0) {
+          selectedRole.value = currentUserRoles.value[0]?.roleId || '';
+        }
+      } catch (error) {
+        console.error('获取角色信息失败:', error);
+        message.error('获取角色信息失败');
+      } finally {
+        loading.value = false;
+      }
     }
   },
   { immediate: true },
@@ -56,19 +82,47 @@ function handleCancel() {
     @cancel="handleCancel"
     ok-text="确定"
     cancel-text="取消"
+    :confirm-loading="loading"
   >
-    <Select
-      v-model:value="selectedRole"
-      style="width: 100%"
-      placeholder="请选择角色"
-    >
-      <Select.Option
-        v-for="role in roles"
-        :key="role.roleId"
-        :value="role.roleId"
-      >
-        {{ role.roleName }}
-      </Select.Option>
-    </Select>
+    <div v-if="loading" class="text-center py-4">
+      <span>加载中...</span>
+    </div>
+    <div v-else>
+      <!-- 显示用户当前角色 -->
+      <div v-if="currentUserRoles.length > 0" class="mb-4">
+        <div class="text-sm text-gray-600 mb-2">当前角色：</div>
+        <div class="flex flex-wrap gap-2">
+          <Tag
+            v-for="role in currentUserRoles"
+            :key="role.roleId"
+            color="blue"
+          >
+            {{ role.roleName }}
+          </Tag>
+        </div>
+      </div>
+      <div v-else class="mb-4">
+        <div class="text-sm text-gray-600 mb-2">当前角色：</div>
+        <Tag color="default">未分配角色</Tag>
+      </div>
+      
+      <!-- 角色选择 -->
+      <div class="mb-4">
+        <div class="text-sm text-gray-600 mb-2">选择新角色：</div>
+        <Select
+          v-model:value="selectedRole"
+          style="width: 100%"
+          placeholder="请选择角色"
+        >
+          <Select.Option
+            v-for="role in roles"
+            :key="role.roleId"
+            :value="role.roleId"
+          >
+            {{ role.roleName }}
+          </Select.Option>
+        </Select>
+      </div>
+    </div>
   </Modal>
 </template>
