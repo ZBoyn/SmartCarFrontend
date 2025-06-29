@@ -24,13 +24,13 @@ export function useFormSchema(): VbenFormSchema[] {
       component: 'Select', // 将 Input 修改为 Select
       fieldName: 'deptId',
       label: $t('system.user.department'),
-      componentProps: {
+      componentProps: () => ({
         // allowClear: true, // 如果需要清空选项，可以开启
-        options: departments.map((dept) => ({
+        options: departments.value.map((dept) => ({
           label: dept.name,
           value: dept.id,
         })),
-      },
+      }),
       rules: 'required', // 建议设为必填
     },
     {
@@ -76,13 +76,13 @@ export function useGridFormSchema(): VbenFormSchema[] {
       component: 'Select', // 将 Input 修改为 Select
       fieldName: 'deptId',
       label: $t('system.user.department'),
-      componentProps: {
+      componentProps: () => ({
         allowClear: true, // 搜索时通常允许清空
-        options: departments.map((dept) => ({
+        options: departments.value.map((dept) => ({
           label: dept.name,
           value: dept.id,
         })),
-      },
+      }),
     },
     {
       component: 'Input',

@@ -19,6 +19,7 @@ import { deleteRole, getRoleList, updateRole } from '#/api';
 import { $t } from '#/locales';
 
 import { useColumns, useGridFormSchema } from './data';
+import AssignUsers from './modules/assign-users.vue';
 import Form from './modules/form.vue';
 
 const selectedRows = ref<SystemRoleApi.SystemRole[]>([]);
@@ -27,6 +28,10 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
   destroyOnClose: true,
 });
+
+// 分配用户弹窗
+const assignUsersVisible = ref(false);
+const currentRole = ref<null | SystemRoleApi.SystemRole>(null);
 
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
@@ -77,6 +82,10 @@ const [Grid, gridApi] = useVbenVxeGrid({
 
 function onActionClick(e: OnActionClickParams<SystemRoleApi.SystemRole>) {
   switch (e.code) {
+    case 'assign-users': {
+      onAssignUsers(e.row);
+      break;
+    }
     case 'delete': {
       onDelete(e.row);
       break;
@@ -200,10 +209,20 @@ function onRefresh() {
 function onCreate() {
   formDrawerApi.setData({}).open();
 }
+
+function onAssignUsers(row: SystemRoleApi.SystemRole) {
+  currentRole.value = row;
+  assignUsersVisible.value = true;
+}
 </script>
 <template>
   <Page auto-content-height>
     <FormDrawer />
+    <AssignUsers
+      :role="currentRole"
+      v-model:visible="assignUsersVisible"
+      @success="onRefresh"
+    />
     <Grid :table-title="$t('system.role.list')">
       <template #toolbar-tools>
         <Button type="primary" @click="onCreate">

@@ -13,6 +13,17 @@ export namespace SystemRoleApi {
     roleSort: number;
     status: 0 | 1;
   }
+
+  export interface RoleUser {
+    createTime: string;
+    deptId: number;
+    deptName: string;
+    nickname: string;
+    phoneNumber: string;
+    status: string;
+    userId: number;
+    username: string;
+  }
 }
 
 /**
@@ -53,4 +64,44 @@ async function deleteRole(id: string) {
   return requestClient.delete(`/system/role/${id}`);
 }
 
-export { createRole, deleteRole, getRoleList, updateRole };
+/**
+ * 获取角色下的用户列表
+ * @param roleId 角色ID
+ */
+async function getRoleUsers(roleId: string) {
+  return requestClient.get<SystemRoleApi.RoleUser[]>(
+    `/system/role/${roleId}/users`,
+  );
+}
+
+/**
+ * 分配用户到角色
+ * @param roleId 角色ID
+ * @param userIds 用户ID数组
+ */
+async function assignUsersToRole(roleId: string, userIds: number[]) {
+  return requestClient.post(`/system/role/${roleId}/users`, {
+    userIds,
+  });
+}
+
+/**
+ * 从角色中移除用户
+ * @param roleId 角色ID
+ * @param userIds 用户ID数组
+ */
+async function removeUsersFromRole(roleId: string, userIds: number[]) {
+  return requestClient.delete(`/system/role/${roleId}/users`, {
+    data: { userIds },
+  });
+}
+
+export {
+  assignUsersToRole,
+  createRole,
+  deleteRole,
+  getRoleList,
+  getRoleUsers,
+  removeUsersFromRole,
+  updateRole,
+};

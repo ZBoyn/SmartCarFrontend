@@ -79,7 +79,15 @@
     "setPermissions": "授权",
     "roleKey": "权限字符",
     "dataScope": "数据范围",
-    "roleSort": "显示顺序"
+    "roleSort": "显示顺序",
+    "assignUsers": "分配用户",
+    "assignUsersTitle": "分配用户",
+    "currentUsers": "当前用户",
+    "allUsers": "所有用户",
+    "addUsers": "添加用户",
+    "removeUsers": "移除用户",
+    "selectUsers": "选择用户",
+    "userCount": "用户数量"
   },
   "title": "系统管理",
   "user": {

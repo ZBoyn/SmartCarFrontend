@@ -7,7 +7,7 @@ import type {
 } from '#/adapter/vxe-table';
 import type { SystemUserApi } from '#/api';
 
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
@@ -19,10 +19,16 @@ import { deleteUser, getUserList, resetUserPassword, updateUser } from '#/api';
 import { $t } from '#/locales';
 
 import { useColumns, useGridFormSchema } from './data';
+import { initDepartments } from './department';
 import AssignRole from './modules/assign-role.vue';
 import Form from './modules/form.vue';
 
 const selectedRows = ref<SystemUserApi.SystemUser[]>([]);
+
+// 初始化部门数据
+onMounted(async () => {
+  await initDepartments();
+});
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,

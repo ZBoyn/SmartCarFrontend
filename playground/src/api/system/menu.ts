@@ -21,6 +21,14 @@ export namespace SystemMenuApi {
     'link',
     'button',
   ] as const;
+
+  // 搜索参数接口
+  export interface SearchParams {
+    name?: string; // 菜单名称
+    status?: number; // 状态
+    type?: string; // 菜单类型
+  }
+
   /** 系统菜单 */
   export interface SystemMenu {
     [key: string]: any;
@@ -85,6 +93,8 @@ export namespace SystemMenuApi {
     pid: string;
     /** 重定向 */
     redirect?: string;
+    /** 状态 */
+    status?: number;
     /** 菜单类型 */
     type: (typeof MenuTypes)[number];
   }
@@ -93,9 +103,10 @@ export namespace SystemMenuApi {
 /**
  * 获取菜单数据列表
  */
-async function getMenuList() {
+async function getMenuList(params?: SystemMenuApi.SearchParams) {
   return requestClient.get<Array<SystemMenuApi.SystemMenu>>(
     '/system/menu/list',
+    { params },
   );
 }
 
