@@ -49,6 +49,7 @@
     "ant-design-vue": "catalog:",
     "dayjs": "catalog:",
     "json-bigint": "catalog:",
+    "markdown-it": "^14.1.0",
     "pinia": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"

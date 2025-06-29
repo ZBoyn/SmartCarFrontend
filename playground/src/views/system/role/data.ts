@@ -101,11 +101,25 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
   onActionClick: OnActionClickFn<T>,
   onStatusChange?: (newStatus: any, row: T) => PromiseLike<boolean | undefined>,
 ): VxeTableGridOptions['columns'] {
-  return [
+  const options = [
+    {
+      code: 'edit',
+      text: '修改',
+    },
+    {
+      code: 'delete',
+      text: '删除',
+    },
+    {
+      code: 'assign-users',
+      text: '分配用户',
+    },
+  ];
+  const columns: VxeTableGridOptions['columns'] = [
     {
       type: 'checkbox',
       width: 60,
-      fixed: 'left', // 将复选框列固定在左侧
+      fixed: 'left',
     },
     {
       field: 'roleId',
@@ -124,8 +138,8 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
     },
     {
       field: 'dataScope',
-      title: $t('system.role.dataScope'), // 建议修改国际化文本为"部门"而非"部门ID"
-      width: 120, // 可适当调整宽度
+      title: $t('system.role.dataScope'),
+      width: 120,
     },
     {
       field: 'roleSort',
@@ -168,16 +182,7 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
           nameTitle: $t('system.role.roleName'),
           onClick: onActionClick,
         },
-        options: [
-          {
-            code: 'edit',
-            title: $t('ui.actionTitle.edit'),
-          },
-          {
-            code: 'delete',
-            title: $t('ui.actionTitle.delete'),
-          },
-        ],
+        options,
         name: 'CellOperation',
       },
       field: 'operation',
@@ -186,4 +191,5 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
       width: 200,
     },
   ];
+  return columns;
 }
