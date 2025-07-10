@@ -8,6 +8,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'ion:settings-outline',
       order: 9997,
       title: $t('system.title'),
+      authority: ['admin'],
     },
     name: 'System',
     path: '/system',
@@ -18,6 +19,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'mdi:account-group',
           title: $t('system.user.title'),
+          authority: ['admin'],
         },
         component: () => import('#/views/system/user/list.vue'),
       },
@@ -27,6 +29,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'mdi:account-group',
           title: $t('system.role.title'),
+          authority: ['admin'],
         },
         component: () => import('#/views/system/role/list.vue'),
       },
@@ -36,6 +39,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'mdi:menu',
           title: $t('system.menu.title'),
+          authority: ['admin'],
         },
         component: () => import('#/views/system/menu/list.vue'),
       },
@@ -45,6 +49,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'mdi:cog',
           title: $t('system.param.title'),
+          authority: ['admin'],
         },
         component: () => import('#/views/system/param/list.vue'),
       },
@@ -54,6 +59,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'charm:organisation',
           title: $t('system.dept.title'),
+          authority: ['admin'],
         },
         component: () => import('#/views/system/dept/list.vue'),
       },

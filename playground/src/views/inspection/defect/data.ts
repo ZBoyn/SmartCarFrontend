@@ -18,6 +18,12 @@ const isVerifiedOptions = [
   { label: '否', value: 0 },
 ];
 
+// 状态选项
+const statusOptions = [
+  { label: '已上报', value: '0' },
+  { label: '已整改', value: '1' },
+];
+
 // 搜索表单配置
 export function useGridFormSchema(): VbenFormSchema[] {
   return [
@@ -31,12 +37,11 @@ export function useGridFormSchema(): VbenFormSchema[] {
       },
     },
     {
-      component: 'Select',
+      component: 'Input',
       fieldName: 'defectType',
       label: '缺陷类型',
       componentProps: {
-        options: defectTypeOptions,
-        placeholder: '请选择缺陷类型',
+        placeholder: '请输入缺陷类型',
         allowClear: true,
       },
     },
@@ -50,44 +55,64 @@ export function useGridFormSchema(): VbenFormSchema[] {
         allowClear: true,
       },
     },
+    {
+      component: 'Select',
+      fieldName: 'status',
+      label: '状态',
+      componentProps: {
+        options: statusOptions,
+        placeholder: '请选择状态',
+        allowClear: true,
+      },
+    },
   ];
 }
 
 export const gridOptions: VxeGridProps = {
   columns: [
-    { title: '序号', type: 'seq', width: 50 },
-    { field: 'taskId', title: '任务名称', width: 120 },
-    { field: 'defectType', title: '缺陷类型', width: 100 },
-    { field: 'distanceFromOrigin', title: '缺陷距离原点位置', width: 120 },
+    { title: '序号', type: 'seq', width: 60, minWidth: 60 },
+    { field: 'taskId', title: '任务名称', minWidth: 120 },
+    { field: 'defectType', title: '缺陷类型', minWidth: 100 },
+    { field: 'distanceFromOrigin', title: '缺陷距离原点位置', minWidth: 140 },
     {
       field: 'imageUrls',
       title: '缺陷图片',
       slots: { default: 'imageUrls' },
-      width: 120,
+      width: 80,
+      minWidth: 80,
     },
     {
       field: 'isVerified',
       title: '是否属实',
       slots: { default: 'isVerified' },
       width: 80,
+      minWidth: 80,
     },
-    { field: 'severity', title: '严重程度', width: 80 },
-    { field: 'defectLength', title: '缺陷长度', width: 80 },
-    { field: 'defectArea', title: '缺陷面积', width: 80 },
-    { field: 'defectQuantity', title: '缺陷数量', width: 80 },
-    { field: 'recommendedAction', title: '建议整改方式', width: 120 },
+    { field: 'severity', title: '严重程度', minWidth: 80 },
+    { field: 'defectLength', title: '缺陷长度', minWidth: 80 },
+    { field: 'defectArea', title: '缺陷面积', minWidth: 80 },
+    { field: 'defectQuantity', title: '缺陷数量', minWidth: 80 },
+    { field: 'recommendedAction', title: '建议整改方式', minWidth: 120 },
     {
       field: 'reportedTime',
       title: '缺陷上报时间',
-      width: 150,
+      minWidth: 150,
       formatter: 'formatDateTime',
+    },
+    {
+      field: 'status',
+      title: '状态',
+      slots: { default: 'status' },
+      width: 100,
+      minWidth: 100,
     },
     {
       field: 'action',
       title: '操作',
       slots: { default: 'action' },
       fixed: 'right',
-      width: 100,
+      width: 150,
+      minWidth: 150,
     },
   ],
   pagerConfig: {},
@@ -108,4 +133,9 @@ export const gridOptions: VxeGridProps = {
     zoom: true,
   },
   height: 'auto',
+  size: 'medium',
+  autoResize: true,
 };
+
+// 导出状态选项供组件使用
+export { statusOptions };

@@ -13,6 +13,7 @@ import {
   getUserList,
   removeUsersFromRole,
 } from '#/api';
+import { getDeptIdNameMap } from '#/api/system/dept';
 import { $t } from '#/locales';
 
 const props = defineProps<{
@@ -25,11 +26,13 @@ const currentUsers = ref<SystemRoleApi.RoleUser[]>([]);
 const allUsers = ref<SystemUserApi.SystemUser[]>([]);
 const loading = ref(false);
 const transferLoading = ref(false);
+const deptMap = ref<Record<number, string>>({});
 
 watch(
   () => props.visible,
   async (val) => {
     if (val && props.role) {
+      deptMap.value = await getDeptIdNameMap();
       await loadCurrentUsers(props.role.roleId);
       await loadAllUsers();
     }
@@ -41,7 +44,10 @@ async function loadCurrentUsers(roleId: string) {
   try {
     loading.value = true;
     const res = await getRoleUsers(roleId);
-    currentUsers.value = res || [];
+    currentUsers.value = (res || []).map((user) => ({
+      ...user,
+      deptName: (deptMap.value[user.deptId] || user.deptId)?.toString(),
+    }));
   } catch {
     message.error('获取角色用户失败');
   } finally {
@@ -52,7 +58,10 @@ async function loadCurrentUsers(roleId: string) {
 async function loadAllUsers() {
   try {
     const res = await getUserList({ page: 1, pageSize: 1000 });
-    allUsers.value = res.items || [];
+    allUsers.value = (res.items || []).map((user) => ({
+      ...user,
+      deptName: (deptMap.value[user.deptId] || user.deptId)?.toString(),
+    }));
   } catch {
     message.error('获取用户列表失败');
   }
@@ -89,8 +98,8 @@ const currentUserIds = computed(() =>
 const allUserOptions = computed(() =>
   allUsers.value.map((user) => ({
     key: user.userId.toString(),
-    title: `${user.username} (${user.nickname})`,
-    description: user.phoneNumber,
+    title: `${user.userId} - ${user.username}`,
+    description: '',
   })),
 );
 const currentRoleName = computed(() => props.role?.roleName || '');
@@ -100,12 +109,6 @@ function handleCancel() {
 }
 
 const currentUserColumns = [
-  {
-    title: $t('system.user.userId'),
-    dataIndex: 'userId',
-    key: 'userId',
-    width: 80,
-  },
   {
     title: $t('system.user.username'),
     dataIndex: 'username',
@@ -136,13 +139,7 @@ const currentUserColumns = [
     key: 'status',
     width: 80,
     customRender: ({ text }: { text: string }) =>
-      text === '1' ? '启用' : '禁用',
-  },
-  {
-    title: $t('system.user.createTime'),
-    dataIndex: 'createTime',
-    key: 'createTime',
-    width: 160,
+      String(text) === '1' ? '启用' : '禁用',
   },
 ];
 </script>

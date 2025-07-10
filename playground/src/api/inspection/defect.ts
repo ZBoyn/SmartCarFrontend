@@ -30,6 +30,7 @@ export namespace InspectionDefectApi {
     isVerified?: number; // 是否属实（0否 1是）
     page?: number;
     pageSize?: number;
+    status?: string; // 缺陷状态
     taskId?: string; // 所属任务名称
   }
 }
@@ -81,4 +82,30 @@ async function deleteDefect(id: string) {
   );
 }
 
-export { createDefect, deleteDefect, getDefectList, updateDefect };
+/**
+ * 更新缺陷状态
+ * @param defectId 缺陷ID
+ * @param status 新状态
+ * @returns 更新结果
+ */
+async function updateDefectStatus(defectId: string, status: string) {
+  // 将前端状态值映射为后端期望的值
+  const statusMapping: Record<string, string> = {
+    已上报: '0',
+    已整改: '1',
+  };
+
+  const backendStatus = statusMapping[status] || '0';
+
+  return requestClient.post<InspectionDefectApi.Defect>(
+    `/inspection/defect/${defectId}/status?status=${backendStatus}`,
+  );
+}
+
+export {
+  createDefect,
+  deleteDefect,
+  getDefectList,
+  updateDefect,
+  updateDefectStatus,
+};

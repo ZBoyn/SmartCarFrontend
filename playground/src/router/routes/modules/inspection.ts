@@ -5,7 +5,7 @@ import { $t } from '#/locales';
 const routes: RouteRecordRaw[] = [
   {
     meta: {
-      icon: 'mdi:clipboard-list',
+      icon: 'carbon:vehicle-services',
       keepAlive: true,
       order: 9995,
       title: $t('inspection.title'),

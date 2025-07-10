@@ -79,6 +79,39 @@ async function resetUserPassword(id: number) {
   return requestClient.put(`/system/user/${id}/reset-password`);
 }
 
+/**
+ * 导出用户列表
+ * @param params 查询参数
+ */
+async function exportUsers(params: Recordable<any>) {
+  return requestClient.download('/system/user/export', { params });
+}
+
+/**
+ * 导入用户列表
+ * @param file 文件对象
+ * @param onProgress 进度回调
+ */
+async function importUsers(
+  file: File,
+  onProgress?: (progress: { percent: number }) => void,
+) {
+  return requestClient.upload(
+    '/system/user/import',
+    { file },
+    {
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
+          onProgress?.({ percent });
+        }
+      },
+    },
+  );
+}
+
 // 获取所有角色
 async function getAllRoles() {
   return requestClient.get('/system/role/list');
@@ -102,9 +135,11 @@ export {
   changeUserRole,
   createUser,
   deleteUser,
+  exportUsers,
   getAllRoles,
   getUserList,
   getUserRoles,
+  importUsers,
   resetUserPassword,
   updateUser,
 };

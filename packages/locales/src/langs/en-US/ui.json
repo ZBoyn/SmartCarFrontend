@@ -15,6 +15,7 @@
     "delete": "Delete {0}",
     "view": "View {0}",
     "export": "Export",
+    "import": "Import",
     "batchDelete": "Batch Delete"
   },
   "actionMessage": {

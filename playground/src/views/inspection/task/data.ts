@@ -36,6 +36,11 @@ export function useFormSchema(): VbenFormSchema[] {
       fieldName: 'taskId',
       label: $t('inspection.task.taskId'),
       rules: 'required',
+      componentProps: {
+        placeholder: '系统将自动生成任务ID',
+        readonly: true,
+        defaultValue: generateTaskId(),
+      },
     },
     {
       component: 'Select',
@@ -103,6 +108,22 @@ export function useFormSchema(): VbenFormSchema[] {
       },
     },
   ];
+}
+
+// 生成任务ID的函数
+function generateTaskId(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const dateStr = `${year}${month}${day}`;
+
+  // 生成3位随机数
+  const randomNum = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, '0');
+
+  return `TASK_${dateStr}-${randomNum}`;
 }
 
 export function useGridFormSchema(): VbenFormSchema[] {

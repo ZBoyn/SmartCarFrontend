@@ -12,7 +12,7 @@ import { ref } from 'vue';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'ant-design-vue';
+import { Button, message, Modal, Transfer } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteRole, getRoleList, updateRole } from '#/api';
@@ -32,6 +32,18 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
 // 分配用户弹窗
 const assignUsersVisible = ref(false);
 const currentRole = ref<null | SystemRoleApi.SystemRole>(null);
+
+// 新增 assignPermissionsVisible、currentRoleForPermissions 两个 ref 状态用于控制权限分配弹窗
+const assignPermissionsVisible = ref(false);
+const currentRoleForPermissions = ref<null | SystemRoleApi.SystemRole>(null);
+const permissionOptions = [
+  { key: 'view', title: '查看' },
+  { key: 'edit', title: '编辑' },
+  { key: 'delete', title: '删除' },
+  { key: 'export', title: '导出' },
+  { key: 'import', title: '导入' },
+];
+const assignedPermissions = ref<string[]>([]);
 
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
@@ -55,7 +67,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
       },
     },
     rowConfig: {
-      keyField: 'id',
+      keyField: 'roleId',
     },
     toolbarConfig: {
       custom: true,
@@ -214,6 +226,15 @@ function onAssignUsers(row: SystemRoleApi.SystemRole) {
   currentRole.value = row;
   assignUsersVisible.value = true;
 }
+
+function onAssignPermissions(row: SystemRoleApi.SystemRole) {
+  currentRoleForPermissions.value = row;
+  // 演示：每次打开都随机分配部分权限
+  assignedPermissions.value = permissionOptions
+    .filter(() => Math.random() > 0.5)
+    .map((i) => i.key);
+  assignPermissionsVisible.value = true;
+}
 </script>
 <template>
   <Page auto-content-height>
@@ -238,6 +259,24 @@ function onAssignUsers(row: SystemRoleApi.SystemRole) {
           {{ $t('demos.actionTitle.batchDelete') }}
         </Button>
       </template>
+      <template #assignPermissions="{ row }">
+        <Button type="link" @click="onAssignPermissions(row)">分配权限</Button>
+      </template>
     </Grid>
+    <Modal
+      v-model:visible="assignPermissionsVisible"
+      title="分配用户权限"
+      width="400px"
+      :footer="null"
+    >
+      <Transfer
+        :data-source="permissionOptions"
+        v-model:target-keys="assignedPermissions"
+        :titles="['可分配权限', '已分配权限']"
+        :show-search="false"
+        :show-select-all="false"
+        :render="(item) => item.title"
+      />
+    </Modal>
   </Page>
 </template>

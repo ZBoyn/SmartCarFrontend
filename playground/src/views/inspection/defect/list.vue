@@ -4,12 +4,21 @@ import { computed, ref } from 'vue';
 import { Page } from '@vben/common-ui';
 import { SvgDownloadIcon } from '@vben/icons';
 
-import { Button, Image, message, Modal, Spin, Tag } from 'ant-design-vue';
+import {
+  Button,
+  Image,
+  message,
+  Modal,
+  Select,
+  Spin,
+  Tag,
+} from 'ant-design-vue';
 import MarkdownIt from 'markdown-it';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
+import { updateDefectStatus } from '#/api/inspection/defect';
 
-import { gridOptions, useGridFormSchema } from './data';
+import { gridOptions, statusOptions, useGridFormSchema } from './data';
 
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
@@ -24,6 +33,11 @@ const isModalVisible = ref(false);
 const isAnalyzing = ref(false);
 const analysisResult = ref('');
 const currentDefect = ref<any>(null);
+
+// 状态修改相关状态
+const isStatusModalVisible = ref(false);
+const editingDefect = ref<any>(null);
+const editingStatus = ref<string>('');
 
 // markdown-it 实例
 const md = new MarkdownIt({
@@ -41,6 +55,34 @@ function isVerifiedTrue(val: any) {
   return val === 1 || val === '1' || val === '是' || val === true;
 }
 
+// 获取状态颜色
+function getStatusColor(status: string): string {
+  const statusText = getStatusText(status);
+  switch (statusText) {
+    case '已上报': {
+      return 'blue';
+    }
+    case '已整改': {
+      return 'green';
+    }
+    default: {
+      return 'default';
+    }
+  }
+}
+
+// 获取状态显示文本
+function getStatusText(status: string): string {
+  const statusMapping: Record<string, string> = {
+    '0': '已上报',
+    '1': '已整改',
+    已上报: '已上报',
+    已整改: '已整改',
+  };
+
+  return statusMapping[status] || '已上报';
+}
+
 // 获取缺陷图片URL
 function getDefectImageUrl(defect: any): null | string {
   if (!defect.imageUrls) return null;
@@ -54,6 +96,41 @@ function getDefectImageUrl(defect: any): null | string {
   }
 
   return null;
+}
+
+// 打开状态修改模态窗口
+function openStatusEdit(defect: any) {
+  editingDefect.value = defect;
+  editingStatus.value = getStatusText(defect.status);
+  isStatusModalVisible.value = true;
+}
+
+// 保存状态修改
+async function saveStatus() {
+  if (!editingDefect.value) return;
+
+  try {
+    // 调用API更新状态
+    await updateDefectStatus(editingDefect.value.defectId, editingStatus.value);
+
+    // 刷新表格数据
+    await gridApi.grid.commitProxy('reload');
+
+    message.success('状态更新成功');
+    isStatusModalVisible.value = false;
+    editingDefect.value = null;
+    editingStatus.value = '';
+  } catch (error) {
+    console.error('状态更新失败:', error);
+    message.error('状态更新失败');
+  }
+}
+
+// 取消状态修改
+function cancelStatusEdit() {
+  isStatusModalVisible.value = false;
+  editingDefect.value = null;
+  editingStatus.value = '';
 }
 
 // 打开AI分析模态窗口
@@ -200,6 +277,9 @@ function onExport() {
           if (col.field === 'isVerified') {
             value = isVerifiedTrue(value) ? '是' : '否';
           }
+          if (col.field === 'status') {
+            value = getStatusText(value);
+          }
           // 处理包含逗号的值
           if (typeof value === 'string' && value.includes(',')) {
             value = `"${value}"`;
@@ -235,7 +315,7 @@ function onExport() {
 
 <template>
   <Page auto-content-height>
-    <Grid table-title="缺陷列表">
+    <Grid table-title="缺陷列表" class="full-width-grid">
       <template #toolbar-tools>
         <Button type="primary" @click="onExport">
           <SvgDownloadIcon class="size-5" />
@@ -259,10 +339,20 @@ function onExport() {
           {{ isVerifiedTrue(row.isVerified) ? '是' : '否' }}
         </Tag>
       </template>
+      <template #status="{ row }">
+        <Tag :color="getStatusColor(row.status)">
+          {{ getStatusText(row.status) }}
+        </Tag>
+      </template>
       <template #action="{ row }">
-        <Button type="primary" size="small" @click="openAiAnalysis(row)">
-          请求维修建议
-        </Button>
+        <div class="flex gap-2">
+          <Button type="primary" size="small" @click="openAiAnalysis(row)">
+            AI分析
+          </Button>
+          <Button type="default" size="small" @click="openStatusEdit(row)">
+            修改状态
+          </Button>
+        </div>
       </template>
     </Grid>
 
@@ -278,7 +368,7 @@ function onExport() {
     >
       <div v-if="currentDefect" class="mb-4">
         <h3 class="mb-2 text-lg font-medium" style="color: #fff">缺陷信息</h3>
-        <div class="defect-info-box">
+        <div class="defect-info-box-dark">
           <p><strong>任务名称:</strong> {{ currentDefect.taskId }}</p>
           <p><strong>缺陷类型:</strong> {{ currentDefect.defectType }}</p>
           <p><strong>严重程度:</strong> {{ currentDefect.severity }}</p>
@@ -297,12 +387,91 @@ function onExport() {
         </Spin>
       </div>
     </Modal>
+
+    <!-- 状态修改模态窗口 -->
+    <Modal
+      v-model:open="isStatusModalVisible"
+      title="修改缺陷状态"
+      width="400px"
+      @ok="saveStatus"
+      @cancel="cancelStatusEdit"
+    >
+      <div v-if="editingDefect" class="mb-4">
+        <h3 class="mb-2 text-lg font-medium">缺陷信息</h3>
+        <div class="defect-info-box-dark">
+          <p><strong>任务名称:</strong> {{ editingDefect.taskId }}</p>
+          <p><strong>缺陷类型:</strong> {{ editingDefect.defectType }}</p>
+          <p>
+            <strong>当前状态:</strong>
+            <Tag :color="getStatusColor(editingDefect.status)">
+              {{ getStatusText(editingDefect.status) }}
+            </Tag>
+          </p>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="mb-2 block font-medium">选择新状态:</label>
+        <Select
+          v-model:value="editingStatus"
+          style="width: 100%"
+          placeholder="请选择状态"
+        >
+          <Select.Option
+            v-for="option in statusOptions"
+            :key="option.value"
+            :value="option.value"
+          >
+            <Tag :color="getStatusColor(option.value)">
+              {{ option.label }}
+            </Tag>
+          </Select.Option>
+        </Select>
+      </div>
+    </Modal>
   </Page>
 </template>
 
 <style scoped>
+/* 确保表格铺满屏幕宽度 */
+.full-width-grid {
+  width: 100%;
+}
+
+.full-width-grid :deep(.vxe-table--main-wrapper) {
+  width: 100% !important;
+}
+
+.full-width-grid :deep(.vxe-table--body-wrapper) {
+  width: 100% !important;
+}
+
+.full-width-grid :deep(.vxe-table) {
+  width: 100% !important;
+}
+
 .analysis-result {
   margin-top: 20px;
+}
+
+.defect-info-box-dark {
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  color: #f5f5f5;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+}
+
+.defect-info-box-dark strong {
+  color: #ffd700;
+}
+
+.defect-info-box-dark .ant-tag {
+  color: #b6fcb6 !important;
+  background: #333 !important;
+  border: none;
 }
 
 .defect-info-box {
@@ -311,6 +480,15 @@ function onExport() {
   font-size: 15px;
   color: #fff;
   background: #333;
+  border-radius: 6px;
+}
+
+.defect-info-box-light {
+  padding: 12px 18px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
   border-radius: 6px;
 }
 

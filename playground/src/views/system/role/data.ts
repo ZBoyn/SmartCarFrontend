@@ -175,6 +175,15 @@ export function useColumns<T = SystemRoleApi.SystemRole>(
       title: $t('system.role.remark'),
     },
     {
+      title: '分配用户权限',
+      field: 'assignPermissions',
+      align: 'center',
+      width: 160,
+      slots: {
+        default: 'assignPermissions',
+      },
+    },
+    {
       align: 'center',
       cellRender: {
         attrs: {

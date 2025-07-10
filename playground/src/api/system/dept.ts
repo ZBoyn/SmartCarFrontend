@@ -78,4 +78,20 @@ async function deleteDept(id: string) {
   return requestClient.delete(`/system/dept/${id}`);
 }
 
-export { createDept, deleteDept, getDeptList, updateDept };
+/**
+ * 获取所有部门的 id -> name 映射
+ */
+async function getDeptIdNameMap() {
+  // 获取原始扁平数组
+  const res =
+    await requestClient.get<Array<SystemDeptApi.SystemDept>>(
+      '/system/dept/list',
+    );
+  const map: Record<number, string> = {};
+  res.forEach((item) => {
+    map[item.deptId] = item.deptName;
+  });
+  return map;
+}
+
+export { createDept, deleteDept, getDeptIdNameMap, getDeptList, updateDept };

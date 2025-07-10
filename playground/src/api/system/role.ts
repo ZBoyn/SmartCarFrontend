@@ -96,6 +96,10 @@ async function removeUsersFromRole(roleId: string, userIds: number[]) {
   });
 }
 
+/**
+ *
+ */
+
 export {
   assignUsersToRole,
   createRole,
